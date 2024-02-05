@@ -1,0 +1,40 @@
+name: release-linux
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install prerequisite
+      run: sudo apt-get install ninja-build
+    - name: configure
+      run: cmake --preset linux-gcc
+    - name: build release package
+      id: build
+      run: |
+        echo "starting to build..."
+        cmake --build build/linux-gcc --config Release
+        export TAG_NAME=`git describe --tags`
+        echo "tag:$TAG_NAME"
+        export OS_NAME=linux
+        export ARCH_NAME=`uname -p`
+        export FALCOR_PERF_TEST_PACKAGE=falcor_perf_test-${TAG_NAME}-${OS_NAME}-${ARCH_NAME}.zip
+        echo "creating zip at ${FALCOR_PERF_TEST_PACKAGE}"
+        cd build/linux-gcc
+        zip -r ${FALCOR_PERF_TEST_PACKAGE} bin/Release/*
+        echo "FALCOR_PERF_TEST_PACKAGE=${FALCOR_PERF_TEST_PACKAGE}" >> $GITHUB_OUTPUT
+    - name: Upload Assert
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ${{ steps.build.outputs.FALCOR_PERF_TEST_PACKAGE }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

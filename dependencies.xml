@@ -1,0 +1,12 @@
+<project toolsVersion="6.0">
+    <remote name="github-slang-windows" type="https" packageLocation="github.com/shader-slang/slang/releases/download/v${version}/slang-${version}-win64.zip"/>
+    <remote name="github-slang-linux" type="https" packageLocation="github.com/shader-slang/slang/releases/download/v${version}/slang-${version}-linux-x86_64.zip"/>
+    <dependency name="slang" linkPath="external/packman/slang">
+        <package name="slang" version="2024.0.4" remotes="github-slang-windows" platforms="windows-x86_64"/>
+        <package name="slang" version="2024.0.4" remotes="github-slang-linux" platforms="linux-x86_64" />
+    </dependency>
+    <remote name="vulkan-headers" type="https" packageLocation="github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v${version}.zip"/>
+    <dependency name="vulkan-headers" linkPath="external/packman/vulkan">
+        <package name="vulkan-headers" version="1.3.275" remotes="vulkan-headers"/>
+    </dependency>
+</project>

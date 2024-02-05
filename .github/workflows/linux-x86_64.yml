@@ -1,0 +1,21 @@
+name: build-linux-x86_64
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install prerequisite
+      run: sudo apt-get install ninja-build
+    - name: configure
+      run: cmake --preset linux-gcc
+    - name: make
+      run: cmake --build build/linux-gcc

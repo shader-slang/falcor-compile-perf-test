@@ -1,0 +1,26 @@
+name: build-win64
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        # ninja version to download. Default: 1.10.0
+        version: 1.10.0
+
+    - name: configure
+      run: cmake --preset windows-ninja-msvc
+    - name: make
+      run: cmake --build build/windows-ninja-msvc

@@ -1,0 +1,43 @@
+name: release-win64
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        # ninja version to download. Default: 1.10.0
+        version: 1.10.0
+
+    - name: configure
+      run: cmake --preset windows-ninja-msvc
+    - name: make
+      id: build
+      run: |
+        echo "build app"
+        cmake --build build/windows-ninja-msvc --config Release
+        $tagName = & git describe --tags
+        $binArchive = "falcor_perf_test-$tagName-win-64.zip"
+        echo "package name=$binArchive"
+        echo "FALCOR_PERF_TEST_PACKAGE=$binArchive" >> $env:GITHUB_OUTPUT
+
+        cd build/windows-ninja-msvc
+        7z a "$binArchive" bin/Release/*
+    - name: UploadBinary
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ${{ steps.build.outputs.FALCOR_PERF_TEST_PACKAGE }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
