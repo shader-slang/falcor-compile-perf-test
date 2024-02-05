@@ -1,0 +1,35 @@
+/***************************************************************************
+ # Copyright (c) 2015-23, NVIDIA CORPORATION. All rights reserved.
+ #
+ # NVIDIA CORPORATION and its licensors retain all intellectual property
+ # and proprietary rights in and to this software, related documentation
+ # and any modifications thereto.  Any use, reproduction, disclosure or
+ # distribution of this software and related documentation without an express
+ # license agreement from NVIDIA CORPORATION is strictly prohibited.
+ **************************************************************************/
+#pragma once
+/// This file can be included in raytracing shaders for automatically defining raytracing entrypoints for hit groups.
+/// Use it like this (see DummyRtDelegate.slangh for a minimal example):
+/// struct MyRtDelegate
+/// {
+///    ...
+/// };
+///
+/// MyRtDelegate gMyRtDelegate
+/// #define SCENE2_GEO_RT_DELEGATE MyRtDelegate
+/// #define SCENE2_GEO_RT_DELEGATE_INSTANCE MyRtDelegate
+/// #include "GeoRtEntryPoints.slangh"
+
+#ifndef SCENE2_GEO_RT_DELEGATE
+#error "You must define `#define SCENE2_GEO_RT_DELEGATE MyRtDelegate` before including this file."
+#endif
+#ifndef SCENE2_GEO_RT_DELEGATE_INSTANCE
+#error "You must define `#define SCENE2_GEO_RT_DELEGATE_INSTANCE gMyRtDelegate` before including this file."
+#endif
+
+/// BEGIN - PROCEDURAL GEO CODE
+#include "SphereGeo/SphereGeoRtEntryPoints.slangh"
+#include "TriangleGeo/TriangleGeoRtEntryPoints.slangh"
+#include "PointCloudGeo/PointCloudGeoRtEntryPoints.slangh"
+#include "CurveOTSGeo/CurveOTSGeoRtEntryPoints.slangh"
+/// END - PROCEDURAL GEO CODE

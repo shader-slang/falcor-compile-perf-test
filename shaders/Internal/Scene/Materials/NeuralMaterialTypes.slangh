@@ -1,0 +1,79 @@
+/***************************************************************************
+ # Copyright (c) 2015-23, NVIDIA CORPORATION. All rights reserved.
+ #
+ # NVIDIA CORPORATION and its licensors retain all intellectual property
+ # and proprietary rights in and to this software, related documentation
+ # and any modifications thereto.  Any use, reproduction, disclosure or
+ # distribution of this software and related documentation without an express
+ # license agreement from NVIDIA CORPORATION is strictly prohibited.
+ **************************************************************************/
+#pragma once
+#include "Utils/HostDeviceShared.slangh"
+
+BEGIN_NAMESPACE_FALCOR
+
+// -------------------------------------------------------------------------
+//
+// This file defines shared types and defines used on the CPU and GPU side
+// for neural materials. It is intended to be #include'ed where it used so
+// that macro definitions are visible.
+//
+// To add a new neural material type.
+//
+//  1. Add a define below. This can be used in the shader with #if..#endif.
+//  2. Add a matching enum. This is used on the host side.
+//  3. Add the string name for the type. This is used in the JSON file.
+//
+// -------------------------------------------------------------------------
+
+// clang-format off
+#define NEURAL_MATERIAL_PRECISION_FP16              1
+#define NEURAL_MATERIAL_PRECISION_FP32              2
+
+#define NEURAL_MATERIAL_TYPE_UNKNOWN                0
+#define NEURAL_MATERIAL_TYPE_LEGACY_MERL            1
+#define NEURAL_MATERIAL_TYPE_BASIC                  2
+#define NEURAL_MATERIAL_TYPE_LATENT_TEXTURES        3
+#define NEURAL_MATERIAL_TYPE_WITH_SHFRAME           4
+#define NEURAL_MATERIAL_TYPE_WITH_SHFRAME_EXTENDED  5
+#define NEURAL_MATERIAL_TYPE_DISPLACEMENT           6
+// Add more types here...
+// clang-format on
+
+#ifdef HOST_CODE
+
+enum class NeuralMaterialType : uint32_t
+{
+    // clang-format off
+    Unknown             = NEURAL_MATERIAL_TYPE_UNKNOWN,
+
+    LegacyMERL          = NEURAL_MATERIAL_TYPE_LEGACY_MERL,             ///< Alex' neural MERL brdfs. This will be removed, it's kept around for testing purposes.
+    Basic               = NEURAL_MATERIAL_TYPE_BASIC,                   ///< Experimental material with basic non-textured inputs (uv, wi, wo).
+    LatentTextures      = NEURAL_MATERIAL_TYPE_LATENT_TEXTURES,         ///< Experimental material with latent textures.
+    WithShFrame         = NEURAL_MATERIAL_TYPE_WITH_SHFRAME,            ///< Similar to LatentTextures but includes also shading frame information.
+    WithShFrameExtended = NEURAL_MATERIAL_TYPE_WITH_SHFRAME_EXTENDED,   ///< Extends WithShFrame with albedo, specular and roughness.
+    Displacement        = NEURAL_MATERIAL_TYPE_DISPLACEMENT,
+    // Add more types here...
+
+    // clang-format on
+
+    Count // Must be last
+};
+
+FALCOR_ENUM_INFO(
+    NeuralMaterialType,
+    {
+        { NeuralMaterialType::Unknown, "Unknown" },
+        { NeuralMaterialType::LegacyMERL, "LegacyMERL" },
+        { NeuralMaterialType::Basic, "Basic" },
+        { NeuralMaterialType::LatentTextures, "LatentTextures" },
+        { NeuralMaterialType::WithShFrame, "WithShFrame" },
+        { NeuralMaterialType::WithShFrameExtended, "WithShFrameExtended" },
+        { NeuralMaterialType::Displacement, "Displacement" },
+    }
+);
+FALCOR_ENUM_REGISTER(NeuralMaterialType);
+
+#endif // HOST_CODE
+
+END_NAMESPACE_FALCOR

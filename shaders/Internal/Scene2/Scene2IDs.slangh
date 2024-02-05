@@ -1,0 +1,67 @@
+/***************************************************************************
+ # Copyright (c) 2015-23, NVIDIA CORPORATION. All rights reserved.
+ #
+ # NVIDIA CORPORATION and its licensors retain all intellectual property
+ # and proprietary rights in and to this software, related documentation
+ # and any modifications thereto.  Any use, reproduction, disclosure or
+ # distribution of this software and related documentation without an express
+ # license agreement from NVIDIA CORPORATION is strictly prohibited.
+ **************************************************************************/
+#pragma once
+#include "Utils/HostDeviceShared.slangh"
+
+#ifdef HOST_CODE
+
+#include "Scene2IDs.h"
+
+#else // HOST_CODE
+
+/// This is the default and obviously correct implementation of the ID
+#define DEFINE_OBJECT_ID_STRUCT(name) \
+    struct name                       \
+    {                                 \
+        uint v;                       \
+        __init(uint v_)               \
+        {                             \
+            v = v_;                   \
+        }                             \
+        uint get()                    \
+        {                             \
+            return v;                 \
+        }                             \
+    };
+
+/// This is the more efficient intrinsics based version, but now needs a magic constant
+/// until Slang updates to provide the UIntType constant to the frontend
+#define DEFINE_OBJECT_ID_INTRINSICS(name)        \
+    __intrinsic_type(9 /*UIntType*/) struct name \
+    {                                            \
+        __init(uint v)                           \
+        {                                        \
+            this = __slang_noop_cast<name>(v);   \
+        }                                        \
+        __intrinsic_op(0) int get();             \
+    };
+
+// clang-format off
+/// Final recommended form, using enums
+#define DEFINE_OBJECT_ID_ENUM(name)  \
+    enum name : uint                 \
+    {                                \
+    };                               \
+    extension name                   \
+    {                                \
+        uint get()                   \
+        {                            \
+            return (uint)this;       \
+        }                            \
+    };
+// clang-format on
+
+#define DEFINE_OBJECT_ID(name) DEFINE_OBJECT_ID_ENUM(name)
+
+DEFINE_OBJECT_ID(SceneGraphNodeID);
+
+#undef DEFINE_OBJECT_ID
+
+#endif // HOST_CODE

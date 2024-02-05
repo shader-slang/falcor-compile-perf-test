@@ -1,0 +1,32 @@
+/***************************************************************************
+ # Copyright (c) 2015-23, NVIDIA CORPORATION. All rights reserved.
+ #
+ # NVIDIA CORPORATION and its licensors retain all intellectual property
+ # and proprietary rights in and to this software, related documentation
+ # and any modifications thereto.  Any use, reproduction, disclosure or
+ # distribution of this software and related documentation without an express
+ # license agreement from NVIDIA CORPORATION is strictly prohibited.
+ **************************************************************************/
+#pragma once
+#include "Internal/Scene2/DummyRtDelegate.slangh"
+import Internal.Scene2.Geometry.SphereGeo.SphereGeoAccessor;
+
+import Utils.Math.Ray;
+
+[shader("intersection")]
+void intersectionClosestHitSphereGeo()
+{
+    const Ray ray = Ray(ObjectRayOrigin(), ObjectRayDirection(), RayTMin(), RayTCurrent());
+    SphereGeoAccessor::Attrib attribs;
+    float t;
+    if (SphereGeoAccessor::intersect(ray, InstanceID(), GeometryIndex(), attribs, t))
+        ReportHit(t, 0, attribs);
+}
+
+[shader("closesthit")]
+void scatterClosestHitSphereGeo(inout SCENE2_GEO_RT_DELEGATE::Payload payload, SphereGeoAccessor::Attrib attribs)
+{
+    SphereGeoHitInfo hit;
+    hit.data = SphereGeoAccessor::makeHitInfo(attribs);
+    SCENE2_GEO_RT_DELEGATE_INSTANCE.handleHit(payload, hit);
+}

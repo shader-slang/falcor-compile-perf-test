@@ -1,0 +1,798 @@
+<?xml version="1.0"?>
+<materialx version="1.38">
+  <!--
+    TM & (c) 2017 Lucasfilm Entertainment Company Ltd. and Lucasfilm Ltd.
+    All rights reserved.  See LICENSE.txt for license.
+
+    Declarations for OSL implementations of standard nodes included in the MaterialX specification.
+  -->
+
+  <!-- ======================================================================== -->
+  <!-- Shader nodes                                                             -->
+  <!-- ======================================================================== -->
+
+  <!-- <surfacematerial> -->
+  <implementation name="IM_surfacematerial_genslang" nodedef="ND_surfacematerial" target="genslang" />
+
+  <!-- <surface_unlit> -->
+  <!--
+  <implementation name="IM_surface_unlit_genslang" nodedef="ND_surface_unlit" file="mx_surface_unlit.osl" function="mx_surface_unlit" target="genslang" />
+  -->
+
+  <!-- ======================================================================== -->
+  <!-- Texture nodes                                                            -->
+  <!-- ======================================================================== -->
+
+  <!-- <image> -->
+  <implementation name="IM_image_float_genslang" nodedef="ND_image_float" sourcecode="ms.sampleTexture({{file}}, samplerState, {{texcoord}}, {{default}}, lod).x" target="genslang">
+    <input name="default" type="float" implname="default_value" />
+  </implementation>
+  <implementation name="IM_image_color3_genslang" nodedef="ND_image_color3" sourcecode="ms.sampleTexture({{file}}, samplerState, {{texcoord}}, float4({{default}}, 0), lod).xyz" target="genslang">
+    <input name="default" type="color3" implname="default_value" />
+  </implementation>
+  <implementation name="IM_image_color4_genslang" nodedef="ND_image_color4" sourcecode="ms.sampleTexture({{file}}, samplerState, {{texcoord}}, {{default}}, lod)" target="genslang">
+    <input name="default" type="color4" implname="default_value" />
+  </implementation>
+  <implementation name="IM_image_vector2_genslang" nodedef="ND_image_vector2" sourcecode="ms.sampleTexture({{file}}, samplerState, {{texcoord}}, float2({{default}}.x, {{default}}.y), lod).xy" target="genslang">
+    <input name="default" type="vector2" implname="default_value" />
+  </implementation>
+  <implementation name="IM_image_vector3_genslang" nodedef="ND_image_vector3" sourcecode="ms.sampleTexture({{file}}, samplerState, {{texcoord}}, float4({{default}}, 0), lod).xyz" target="genslang">
+    <input name="default" type="vector3" implname="default_value" />
+  </implementation>
+  <implementation name="IM_image_vector4_genslang" nodedef="ND_image_vector4" sourcecode="ms.sampleTexture({{file}}, samplerState, {{texcoord}}, {{default}}, lod)" target="genslang">
+    <input name="default" type="vector4" implname="default_value" />
+  </implementation>
+
+  <!-- <triplanarprojection> -->
+
+  <!-- <normalmap> -->
+  <implementation name="IM_normalmap_genslang" nodedef="ND_normalmap" sourcecode="mx_normalmap({{in}}, {{space}}, {{scale}}, {{normal}}, {{tangent}})" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Procedural nodes                                                         -->
+  <!-- ======================================================================== -->
+
+  <!-- <constant> -->
+  <implementation name="IM_constant_float_genslang" nodedef="ND_constant_float" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_color3_genslang" nodedef="ND_constant_color3" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_color4_genslang" nodedef="ND_constant_color4" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_vector2_genslang" nodedef="ND_constant_vector2" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_vector3_genslang" nodedef="ND_constant_vector3" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_vector4_genslang" nodedef="ND_constant_vector4" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_boolean_genslang" nodedef="ND_constant_boolean" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_integer_genslang" nodedef="ND_constant_integer" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_matrix33_genslang" nodedef="ND_constant_matrix33" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_matrix44_genslang" nodedef="ND_constant_matrix44" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_string_genslang" nodedef="ND_constant_string" sourcecode="{{value}}" target="genslang" />
+  <implementation name="IM_constant_filename_genslang" nodedef="ND_constant_filename" sourcecode="{{value}}" target="genslang" />
+
+  <!-- <ramplr> -->
+  <implementation name="IM_ramplr_float_genslang" nodedef="ND_ramplr_float" sourcecode="lerp({{valuel}}, {{valuer}}, saturate({{texcoord}}.x))" target="genslang" />
+  <implementation name="IM_ramplr_color3_genslang" nodedef="ND_ramplr_color3" sourcecode="lerp({{valuel}}, {{valuer}}, saturate({{texcoord}}.x))" target="genslang" />
+  <implementation name="IM_ramplr_color4_genslang" nodedef="ND_ramplr_color4" sourcecode="lerp({{valuel}}, {{valuer}}, saturate({{texcoord}}.x))" target="genslang" />
+  <implementation name="IM_ramplr_vector2_genslang" nodedef="ND_ramplr_vector2" sourcecode="lerp({{valuel}}, {{valuer}}, saturate({{texcoord}}.x))" target="genslang" />
+  <implementation name="IM_ramplr_vector3_genslang" nodedef="ND_ramplr_vector3" sourcecode="lerp({{valuel}}, {{valuer}}, saturate({{texcoord}}.x))" target="genslang" />
+  <implementation name="IM_ramplr_vector4_genslang" nodedef="ND_ramplr_vector4" sourcecode="lerp({{valuel}}, {{valuer}}, saturate({{texcoord}}.x))" target="genslang" />
+
+  <!-- <ramptb> -->
+  <implementation name="IM_ramptb_float_genslang" nodedef="ND_ramptb_float" sourcecode="lerp({{valuet}}, {{valueb}}, saturate({{texcoord}}.y))" target="genslang" />
+  <implementation name="IM_ramptb_color3_genslang" nodedef="ND_ramptb_color3" sourcecode="lerp({{valuet}}, {{valueb}}, saturate({{texcoord}}.y))" target="genslang" />
+  <implementation name="IM_ramptb_color4_genslang" nodedef="ND_ramptb_color4" sourcecode="lerp({{valuet}}, {{valueb}}, saturate({{texcoord}}.y))" target="genslang" />
+  <implementation name="IM_ramptb_vector2_genslang" nodedef="ND_ramptb_vector2" sourcecode="lerp({{valuet}}, {{valueb}}, saturate({{texcoord}}.y))" target="genslang" />
+  <implementation name="IM_ramptb_vector3_genslang" nodedef="ND_ramptb_vector3" sourcecode="lerp({{valuet}}, {{valueb}}, saturate({{texcoord}}.y))" target="genslang" />
+  <implementation name="IM_ramptb_vector4_genslang" nodedef="ND_ramptb_vector4" sourcecode="lerp({{valuet}}, {{valueb}}, saturate({{texcoord}}.y))" target="genslang" />
+
+  <!-- <splitlr> -->
+  <implementation name="IM_splitlr_float_genslang" nodedef="ND_splitlr_float" sourcecode="(({{texcoord}}.x < {{center}}) ? {{valuel}} : {{valuer}})" target="genslang" />
+  <implementation name="IM_splitlr_color3_genslang" nodedef="ND_splitlr_color3" sourcecode="(({{texcoord}}.x < {{center}}) ? {{valuel}} : {{valuer}})" target="genslang" />
+  <implementation name="IM_splitlr_color4_genslang" nodedef="ND_splitlr_color4" sourcecode="(({{texcoord}}.x < {{center}}) ? {{valuel}} : {{valuer}})" target="genslang" />
+  <implementation name="IM_splitlr_vector2_genslang" nodedef="ND_splitlr_vector2" sourcecode="(({{texcoord}}.x < {{center}}) ? {{valuel}} : {{valuer}})" target="genslang" />
+  <implementation name="IM_splitlr_vector3_genslang" nodedef="ND_splitlr_vector3" sourcecode="(({{texcoord}}.x < {{center}}) ? {{valuel}} : {{valuer}})" target="genslang" />
+  <implementation name="IM_splitlr_vector4_genslang" nodedef="ND_splitlr_vector4" sourcecode="(({{texcoord}}.x < {{center}}) ? {{valuel}} : {{valuer}})" target="genslang" />
+
+  <!-- <splittb> -->
+  <implementation name="IM_splittb_float_genslang" nodedef="ND_splittb_float" sourcecode="(({{texcoord}}.y < {{center}}) ? {{valuet}} : {{valueb}})" target="genslang" />
+  <implementation name="IM_splittb_color3_genslang" nodedef="ND_splittb_color3" sourcecode="(({{texcoord}}.y < {{center}}) ? {{valuet}} : {{valueb}})" target="genslang" />
+  <implementation name="IM_splittb_color4_genslang" nodedef="ND_splittb_color4" sourcecode="(({{texcoord}}.y < {{center}}) ? {{valuet}} : {{valueb}})" target="genslang" />
+  <implementation name="IM_splittb_vector2_genslang" nodedef="ND_splittb_vector2" sourcecode="(({{texcoord}}.y < {{center}}) ? {{valuet}} : {{valueb}})" target="genslang" />
+  <implementation name="IM_splittb_vector3_genslang" nodedef="ND_splittb_vector3" sourcecode="(({{texcoord}}.y < {{center}}) ? {{valuet}} : {{valueb}})" target="genslang" />
+  <implementation name="IM_splittb_vector4_genslang" nodedef="ND_splittb_vector4" sourcecode="(({{texcoord}}.y < {{center}}) ? {{valuet}} : {{valueb}})" target="genslang" />
+
+  <!-- <noise2d> -->
+  <implementation name="IM_noise2d_float_genslang" nodedef="ND_noise2d_float" sourcecode="(mx_noise_float({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_color3_genslang" nodedef="ND_noise2d_color3" sourcecode="(mx_noise_float3({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_color4_genslang" nodedef="ND_noise2d_color4" sourcecode="(mx_noise_float4({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_color3FA_genslang" nodedef="ND_noise2d_color3FA" sourcecode="(mx_noise_float3({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_color4FA_genslang" nodedef="ND_noise2d_color4FA" sourcecode="(mx_noise_float4({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_vector2_genslang" nodedef="ND_noise2d_vector2" sourcecode="(mx_noise_float2({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_vector3_genslang" nodedef="ND_noise2d_vector3" sourcecode="(mx_noise_float3({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_vector4_genslang" nodedef="ND_noise2d_vector4" sourcecode="(mx_noise_float4({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_vector2FA_genslang" nodedef="ND_noise2d_vector2FA" sourcecode="(mx_noise_float2({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_vector3FA_genslang" nodedef="ND_noise2d_vector3FA" sourcecode="(mx_noise_float3({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise2d_vector4FA_genslang" nodedef="ND_noise2d_vector4FA" sourcecode="(mx_noise_float4({{texcoord}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+
+  <!-- <noise3d> -->
+  <implementation name="IM_noise3d_float_genslang" nodedef="ND_noise3d_float" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_color3_genslang" nodedef="ND_noise3d_color3" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_color4_genslang" nodedef="ND_noise3d_color4" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_color3FA_genslang" nodedef="ND_noise3d_color3FA" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_color4FA_genslang" nodedef="ND_noise3d_color4FA" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_vector2_genslang" nodedef="ND_noise3d_vector2" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_vector3_genslang" nodedef="ND_noise3d_vector3" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_vector4_genslang" nodedef="ND_noise3d_vector4" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_vector2FA_genslang" nodedef="ND_noise3d_vector2FA" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_vector3FA_genslang" nodedef="ND_noise3d_vector3FA" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+  <implementation name="IM_noise3d_vector4FA_genslang" nodedef="ND_noise3d_vector4FA" sourcecode="(mx_noise_float({{position}}) * {{amplitude}} + {{pivot}})" target="genslang" />
+
+  <!-- <fractal3d> -->
+  <implementation name="IM_fractal3d_float_genslang" nodedef="ND_fractal3d_float" sourcecode="(mx_fractal_noise_float({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_color3_genslang" nodedef="ND_fractal3d_color3" sourcecode="(mx_fractal_noise_float3({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_color4_genslang" nodedef="ND_fractal3d_color4" sourcecode="(mx_fractal_noise_float4({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_color3FA_genslang" nodedef="ND_fractal3d_color3FA" sourcecode="(mx_fractal_noise_float3({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_color4FA_genslang" nodedef="ND_fractal3d_color4FA" sourcecode="(mx_fractal_noise_float4({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_vector2_genslang" nodedef="ND_fractal3d_vector2" sourcecode="(mx_fractal_noise_float2({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_vector3_genslang" nodedef="ND_fractal3d_vector3" sourcecode="(mx_fractal_noise_float3({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_vector4_genslang" nodedef="ND_fractal3d_vector4" sourcecode="(mx_fractal_noise_float4({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_vector2FA_genslang" nodedef="ND_fractal3d_vector2FA" sourcecode="(mx_fractal_noise_float2({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_vector3FA_genslang" nodedef="ND_fractal3d_vector3FA" sourcecode="(mx_fractal_noise_float3({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+  <implementation name="IM_fractal3d_vector4FA_genslang" nodedef="ND_fractal3d_vector4FA" sourcecode="(mx_fractal_noise_float4({{position}}, {{octaves}}, {{lacunarity}}, {{diminish}}) * {{amplitude}})" target="genslang" />
+
+  <!-- <cellnoise2d> -->
+  <implementation name="IM_cellnoise2d_float_genslang" nodedef="ND_cellnoise2d_float" sourcecode="mx_cell_noise_float({{texcoord}})" target="genslang" />
+
+  <!-- <cellnoise3d> -->
+  <implementation name="IM_cellnoise3d_float_genslang" nodedef="ND_cellnoise3d_float" sourcecode="mx_cell_noise_float({{position}})" target="genslang" />
+
+  <!-- <worleynoise2d> -->
+  <implementation name="IM_worleynoise2d_float_genslang" nodedef="ND_worleynoise2d_float" sourcecode="mx_worley_noise_float({{texcoord}}, {{jitter}}, 0)" target="genslang" />
+  <implementation name="IM_worleynoise2d_vector2_genslang" nodedef="ND_worleynoise2d_vector2" sourcecode="mx_worley_noise_vec2({{texcoord}}, {{jitter}}, 0)" target="genslang" />
+  <implementation name="IM_worleynoise2d_vector3_genslang" nodedef="ND_worleynoise2d_vector3" sourcecode="mx_worley_noise_vec3({{texcoord}}, {{jitter}}, 0)" target="genslang" />
+
+  <!-- <worleynoise3d> -->
+  <implementation name="IM_worleynoise3d_float_genslang" nodedef="ND_worleynoise3d_float" sourcecode="mx_worley_noise_float({{position}}, {{jitter}}, 0)" target="genslang" />
+  <implementation name="IM_worleynoise3d_vector2_genslang" nodedef="ND_worleynoise3d_vector2" fsourcecode="mx_worley_noise_vec2({{position}}, {{jitter}}, 0)" target="genslang" />
+  <implementation name="IM_worleynoise3d_vector3_genslang" nodedef="ND_worleynoise3d_vector3" fsourcecode="mx_worley_noise_vec3({{position}}, {{jitter}}, 0)" target="genslang" />
+
+
+  <!-- ======================================================================== -->
+  <!-- Global nodes                                                             -->
+  <!-- ======================================================================== -->
+
+  <!-- <ambientocclusion> -->
+
+  <!-- ======================================================================== -->
+  <!-- Geometric nodes                                                          -->
+  <!-- ======================================================================== -->
+
+  <!-- <position> -->
+  <implementation name="IM_position_vector3_genslang" nodedef="ND_position_vector3" sourcecode="({{space}} == mx_space_world ? sd.posW : mul(objectFromWorld, float4(sd.posW,1)).xyz)" target="genslang" />
+
+  <!-- <normal> -->
+  <implementation name="IM_normal_vector3_genslang" nodedef="ND_normal_vector3" sourcecode="({{space}} == mx_space_world ? sd.frame.N : mul(objectFromWorldIT, sd.frame.N))" target="genslang" />
+
+  <!-- <tangent> -->
+  <implementation name="IM_tangent_vector3_genslang" nodedef="ND_tangent_vector3" sourcecode="({{space}} == mx_space_world ? sd.frame.T : mul(objectFromWorld, float4(sd.frame.T,0)).xyz)" target="genslang" />
+
+  <!-- <bitangent> -->
+  <implementation name="IM_bitangent_vector3_genslang" nodedef="ND_bitangent_vector3" sourcecode="({{space}} == mx_space_world ? sd.frame.B : mul(objectFromWorld, float4(sd.frame.B,0)).xyz)" target="genslang" />
+
+  <!-- <texcoord> -->
+  <implementation name="IM_texcoord_vector2_genslang" nodedef="ND_texcoord_vector2" sourcecode="sd.uv" target="genslang" />
+  <implementation name="IM_texcoord_vector3_genslang" nodedef="ND_texcoord_vector3" sourcecode="float3(sd.uv,0)" target="genslang" />
+
+  <!-- <geomcolor> -->
+  <implementation name="IM_geomcolor_float_genslang" nodedef="ND_geomcolor_float" sourcecode="0 /* UNIMPLEMENTED geomcolor */" target="genslang" />
+  <implementation name="IM_geomcolor_color3_genslang" nodedef="ND_geomcolor_color3" sourcecode="float3(0) /* UNIMPLEMENTED geomcolor */" target="genslang" />
+  <implementation name="IM_geomcolor_color4_genslang" nodedef="ND_geomcolor_color4" sourcecode="float4(0) /* UNIMPLEMENTED geomcolor */" target="genslang" />
+
+  <!-- <geompropvalue> -->
+  <implementation name="IM_geompropvalue_integer_genslang" nodedef="ND_geompropvalue_integer" sourcecode="0 /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+  <implementation name="IM_geompropvalue_boolean_genslang" nodedef="ND_geompropvalue_boolean" sourcecode="false /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+  <implementation name="IM_geompropvalue_string_genslang" nodedef="ND_geompropvalue_string" sourcecode=" STRING /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+  <implementation name="IM_geompropvalue_float_genslang" nodedef="ND_geompropvalue_float" sourcecode="0 /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+  <implementation name="IM_geompropvalue_color3_genslang" nodedef="ND_geompropvalue_color3" sourcecode="float3(sd.uv.x, sd.uv.y, 0) /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+  <implementation name="IM_geompropvalue_color4_genslang" nodedef="ND_geompropvalue_color4" sourcecode="float4(sd.uv.x, sd.uv.y, 0, 0) /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+  <implementation name="IM_geompropvalue_vector2_genslang" nodedef="ND_geompropvalue_vector2" sourcecode="float2(sd.uv.x, sd.uv.y) /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+  <implementation name="IM_geompropvalue_vector3_genslang" nodedef="ND_geompropvalue_vector3" sourcecode="float3(sd.uv.x, sd.uv.y, 0) /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+  <implementation name="IM_geompropvalue_vector4_genslang" nodedef="ND_geompropvalue_vector4" sourcecode="float4(sd.uv.x, sd.uv.y, 0, 0) /* UNIMPLEMENTED geompropvalue */" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Application nodes                                                        -->
+  <!-- ======================================================================== -->
+
+  <!-- <frame> -->
+  <implementation name="IM_frame_float_genslang" nodedef="ND_frame_float" sourcecode="1 /* UNIMPLEMENTED frame */" target="genslang" />
+
+  <!-- <time> -->
+  <implementation name="IM_time_float_genslang" nodedef="ND_time_float" sourcecode="(1.f / 24.f) /* UNIMPLEMENTED time */" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Math nodes                                                               -->
+  <!-- ======================================================================== -->
+
+  <!-- <add> -->
+  <implementation name="IM_add_float_genslang" nodedef="ND_add_float" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_color3_genslang" nodedef="ND_add_color3" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_color3FA_genslang" nodedef="ND_add_color3FA" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_color4_genslang" nodedef="ND_add_color4" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_color4FA_genslang" nodedef="ND_add_color4FA" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_vector2_genslang" nodedef="ND_add_vector2" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_vector2FA_genslang" nodedef="ND_add_vector2FA" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_vector3_genslang" nodedef="ND_add_vector3" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_vector3FA_genslang" nodedef="ND_add_vector3FA" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_vector4_genslang" nodedef="ND_add_vector4" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_vector4FA_genslang" nodedef="ND_add_vector4FA" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_matrix33_genslang" nodedef="ND_add_matrix33" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_matrix33FA_genslang" nodedef="ND_add_matrix33FA" sourcecode="{{in1}} + float3x3({{in2}})" target="genslang" />
+  <implementation name="IM_add_matrix44_genslang" nodedef="ND_add_matrix44" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_matrix44FA_genslang" nodedef="ND_add_matrix44FA" sourcecode="{{in1}} + {{in2}}" target="genslang" />
+  <implementation name="IM_add_surfaceshader_genslang" nodedef="ND_add_surfaceshader" sourcecode="{{in1}} + float4x4({{in2}})" target="genslang" />
+
+  <!-- <subtract> -->
+  <implementation name="IM_subtract_float_genslang" nodedef="ND_subtract_float" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_color3_genslang" nodedef="ND_subtract_color3" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_color3FA_genslang" nodedef="ND_subtract_color3FA" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_color4_genslang" nodedef="ND_subtract_color4" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_color4FA_genslang" nodedef="ND_subtract_color4FA" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_vector2_genslang" nodedef="ND_subtract_vector2" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_vector2FA_genslang" nodedef="ND_subtract_vector2FA" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_vector3_genslang" nodedef="ND_subtract_vector3" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_vector3FA_genslang" nodedef="ND_subtract_vector3FA" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_vector4_genslang" nodedef="ND_subtract_vector4" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_vector4FA_genslang" nodedef="ND_subtract_vector4FA" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_matrix33_genslang" nodedef="ND_subtract_matrix33" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_matrix33FA_genslang" nodedef="ND_subtract_matrix33FA" sourcecode="{{in1}} - float3x3({{in2}})" target="genslang" />
+  <implementation name="IM_subtract_matrix44_genslang" nodedef="ND_subtract_matrix44" sourcecode="{{in1}} - {{in2}}" target="genslang" />
+  <implementation name="IM_subtract_matrix44FA_genslang" nodedef="ND_subtract_matrix44FA" sourcecode="{{in1}} - float4x4({{in2}})" target="genslang" />
+
+  <!-- <multiply> -->
+  <implementation name="IM_multiply_float_genslang" nodedef="ND_multiply_float" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_color3_genslang" nodedef="ND_multiply_color3" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_color3FA_genslang" nodedef="ND_multiply_color3FA" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_color4_genslang" nodedef="ND_multiply_color4" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_color4FA_genslang" nodedef="ND_multiply_color4FA" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_vector2_genslang" nodedef="ND_multiply_vector2" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_vector2FA_genslang" nodedef="ND_multiply_vector2FA" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_vector3_genslang" nodedef="ND_multiply_vector3" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_vector3FA_genslang" nodedef="ND_multiply_vector3FA" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_vector4_genslang" nodedef="ND_multiply_vector4" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_vector4FA_genslang" nodedef="ND_multiply_vector4FA" sourcecode="{{in1}} * {{in2}}" target="genslang" />
+  <implementation name="IM_multiply_matrix33_genslang" nodedef="ND_multiply_matrix33" sourcecode="mul({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_multiply_matrix44_genslang" nodedef="ND_multiply_matrix44" sourcecode="mul({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_multiply_surfaceshaderF_genslang" nodedef="ND_multiply_surfaceshaderF" sourcecode="/* UNIMPLEMENTED multiply_surfacesharedF */" target="genslang" />
+  <implementation name="IM_multiply_surfaceshaderC_genslang" nodedef="ND_multiply_surfaceshaderC" sourcecode="/* UNIMPLEMENTED multiply_surfacesharedC */" target="genslang" />
+
+
+  <!-- <divide> -->
+  <implementation name="IM_divide_float_genslang" nodedef="ND_divide_float" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_color3_genslang" nodedef="ND_divide_color3" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_color3FA_genslang" nodedef="ND_divide_color3FA" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_color4_genslang" nodedef="ND_divide_color4" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_color4FA_genslang" nodedef="ND_divide_color4FA" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_vector2_genslang" nodedef="ND_divide_vector2" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_vector2FA_genslang" nodedef="ND_divide_vector2FA" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_vector3_genslang" nodedef="ND_divide_vector3" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_vector3FA_genslang" nodedef="ND_divide_vector3FA" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_vector4_genslang" nodedef="ND_divide_vector4" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_vector4FA_genslang" nodedef="ND_divide_vector4FA" sourcecode="{{in1}} / {{in2}}" target="genslang" />
+  <implementation name="IM_divide_matrix33_genslang" nodedef="ND_divide_matrix33" sourcecode="mul({{in1}}, inverse({{in2}}))" target="genslang" />
+  <implementation name="IM_divide_matrix44_genslang" nodedef="ND_divide_matrix44" sourcecode="mul({{in1}}, inverse({{in2}}))" target="genslang" />
+
+  <!-- <modulo> -->
+  <implementation name="IM_modulo_float_genslang" nodedef="ND_modulo_float" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_color3_genslang" nodedef="ND_modulo_color3" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_color3FA_genslang" nodedef="ND_modulo_color3FA" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_color4_genslang" nodedef="ND_modulo_color4" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_color4FA_genslang" nodedef="ND_modulo_color4FA" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_vector2_genslang" nodedef="ND_modulo_vector2" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_vector2FA_genslang" nodedef="ND_modulo_vector2FA" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_vector3_genslang" nodedef="ND_modulo_vector3" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_vector3FA_genslang" nodedef="ND_modulo_vector3FA" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_vector4_genslang" nodedef="ND_modulo_vector4" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_modulo_vector4FA_genslang" nodedef="ND_modulo_vector4FA" sourcecode="mx_modulo({{in1}}, {{in2}})" target="genslang" />
+
+  <!-- <invert> -->
+  <implementation name="IM_invert_float_genslang" nodedef="ND_invert_float" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_color3_genslang" nodedef="ND_invert_color3" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_color3FA_genslang" nodedef="ND_invert_color3FA" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_color4_genslang" nodedef="ND_invert_color4" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_color4FA_genslang" nodedef="ND_invert_color4FA" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_vector2_genslang" nodedef="ND_invert_vector2" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_vector2FA_genslang" nodedef="ND_invert_vector2FA" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_vector3_genslang" nodedef="ND_invert_vector3" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_vector3FA_genslang" nodedef="ND_invert_vector3FA" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_vector4_genslang" nodedef="ND_invert_vector4" sourcecode="{{amount}} - {{in}}" target="genslang" />
+  <implementation name="IM_invert_vector4FA_genslang" nodedef="ND_invert_vector4FA" sourcecode="{{amount}} - {{in}}" target="genslang" />
+
+  <!-- <absval> -->
+  <implementation name="IM_absval_float_genslang" nodedef="ND_absval_float" sourcecode="abs({{in}})" target="genslang" />
+  <implementation name="IM_absval_color3_genslang" nodedef="ND_absval_color3" sourcecode="abs({{in}})" target="genslang" />
+  <implementation name="IM_absval_color4_genslang" nodedef="ND_absval_color4" sourcecode="abs({{in}})" target="genslang" />
+  <implementation name="IM_absval_vector2_genslang" nodedef="ND_absval_vector2" sourcecode="abs({{in}})" target="genslang" />
+  <implementation name="IM_absval_vector3_genslang" nodedef="ND_absval_vector3" sourcecode="abs({{in}})" target="genslang" />
+  <implementation name="IM_absval_vector4_genslang" nodedef="ND_absval_vector4" sourcecode="abs({{in}})" target="genslang" />
+
+  <!-- <floor> -->
+  <implementation name="IM_floor_float_genslang" nodedef="ND_floor_float" sourcecode="floor({{in}})" target="genslang" />
+  <implementation name="IM_floor_color3_genslang" nodedef="ND_floor_color3" sourcecode="floor({{in}})" target="genslang" />
+  <implementation name="IM_floor_color4_genslang" nodedef="ND_floor_color4" sourcecode="floor({{in}})" target="genslang" />
+  <implementation name="IM_floor_vector2_genslang" nodedef="ND_floor_vector2" sourcecode="floor({{in}})" target="genslang" />
+  <implementation name="IM_floor_vector3_genslang" nodedef="ND_floor_vector3" sourcecode="floor({{in}})" target="genslang" />
+  <implementation name="IM_floor_vector4_genslang" nodedef="ND_floor_vector4" sourcecode="floor({{in}})" target="genslang" />
+
+  <!-- <ceil> -->
+  <implementation name="IM_ceil_float_genslang" nodedef="ND_ceil_float" sourcecode="ceil({{in}})" target="genslang" />
+  <implementation name="IM_ceil_color3_genslang" nodedef="ND_ceil_color3" sourcecode="ceil({{in}})" target="genslang" />
+  <implementation name="IM_ceil_color4_genslang" nodedef="ND_ceil_color4" sourcecode="ceil({{in}})" target="genslang" />
+  <implementation name="IM_ceil_vector2_genslang" nodedef="ND_ceil_vector2" sourcecode="ceil({{in}})" target="genslang" />
+  <implementation name="IM_ceil_vector3_genslang" nodedef="ND_ceil_vector3" sourcecode="ceil({{in}})" target="genslang" />
+  <implementation name="IM_ceil_vector4_genslang" nodedef="ND_ceil_vector4" sourcecode="ceil({{in}})" target="genslang" />
+
+  <!-- <power> -->
+  <implementation name="IM_power_float_genslang" nodedef="ND_power_float" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_color3_genslang" nodedef="ND_power_color3" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_color3FA_genslang" nodedef="ND_power_color3FA" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_color4_genslang" nodedef="ND_power_color4" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_color4FA_genslang" nodedef="ND_power_color4FA" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_vector2_genslang" nodedef="ND_power_vector2" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_vector2FA_genslang" nodedef="ND_power_vector2FA" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_vector3_genslang" nodedef="ND_power_vector3" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_vector3FA_genslang" nodedef="ND_power_vector3FA" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_vector4_genslang" nodedef="ND_power_vector4" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_power_vector4FA_genslang" nodedef="ND_power_vector4FA" sourcecode="pow({{in1}}, {{in2}})" target="genslang" />
+
+  <!-- <sin>, <cos>, <tan>, <asin>, <acos>, <atan2> -->
+  <implementation name="IM_sin_float_genslang" nodedef="ND_sin_float" sourcecode="sin({{in}})" target="genslang" />
+  <implementation name="IM_cos_float_genslang" nodedef="ND_cos_float" sourcecode="cos({{in}})" target="genslang" />
+  <implementation name="IM_tan_float_genslang" nodedef="ND_tan_float" sourcecode="tan({{in}})" target="genslang" />
+  <implementation name="IM_asin_float_genslang" nodedef="ND_asin_float" sourcecode="asin({{in}})" target="genslang" />
+  <implementation name="IM_acos_float_genslang" nodedef="ND_acos_float" sourcecode="acos({{in}})" target="genslang" />
+  <implementation name="IM_atan2_float_genslang" nodedef="ND_atan2_float" sourcecode="atan2({{in1}}, {{in2}})" target="genslang" />
+
+  <implementation name="IM_sin_vector2_genslang" nodedef="ND_sin_vector2" sourcecode="sin({{in}})" target="genslang" />
+  <implementation name="IM_cos_vector2_genslang" nodedef="ND_cos_vector2" sourcecode="cos({{in}})" target="genslang" />
+  <implementation name="IM_tan_vector2_genslang" nodedef="ND_tan_vector2" sourcecode="tan({{in}})" target="genslang" />
+  <implementation name="IM_asin_vector2_genslang" nodedef="ND_asin_vector2" sourcecode="asin({{in}})" target="genslang" />
+  <implementation name="IM_acos_vector2_genslang" nodedef="ND_acos_vector2" sourcecode="acos({{in}})" target="genslang" />
+  <implementation name="IM_atan2_vector2_genslang" nodedef="ND_atan2_vector2" sourcecode="atan2({{in1}}, {{in2}})" target="genslang" />
+
+  <implementation name="IM_sin_vector3_genslang" nodedef="ND_sin_vector3" sourcecode="sin({{in}})" target="genslang" />
+  <implementation name="IM_cos_vector3_genslang" nodedef="ND_cos_vector3" sourcecode="cos({{in}})" target="genslang" />
+  <implementation name="IM_tan_vector3_genslang" nodedef="ND_tan_vector3" sourcecode="tan({{in}})" target="genslang" />
+  <implementation name="IM_asin_vector3_genslang" nodedef="ND_asin_vector3" sourcecode="asin({{in}})" target="genslang" />
+  <implementation name="IM_acos_vector3_genslang" nodedef="ND_acos_vector3" sourcecode="acos({{in}})" target="genslang" />
+  <implementation name="IM_atan2_vector3_genslang" nodedef="ND_atan2_vector3" sourcecode="atan2({{in1}}, {{in2}})" target="genslang" />
+
+  <implementation name="IM_sin_vector4_genslang" nodedef="ND_sin_vector4" sourcecode="sin({{in}})" target="genslang" />
+  <implementation name="IM_cos_vector4_genslang" nodedef="ND_cos_vector4" sourcecode="cos({{in}})" target="genslang" />
+  <implementation name="IM_tan_vector4_genslang" nodedef="ND_tan_vector4" sourcecode="tan({{in}})" target="genslang" />
+  <implementation name="IM_asin_vector4_genslang" nodedef="ND_asin_vector4" sourcecode="asin({{in}})" target="genslang" />
+  <implementation name="IM_acos_vector4_genslang" nodedef="ND_acos_vector4" sourcecode="acos({{in}})" target="genslang" />
+  <implementation name="IM_atan2_vector4_genslang" nodedef="ND_atan2_vector4" sourcecode="atan2({{in1}}, {{in2}})" target="genslang" />
+
+  <!-- <sqrt> -->
+  <implementation name="IM_sqrt_float_genslang" nodedef="ND_sqrt_float" sourcecode="sqrt({{in}})" target="genslang" />
+  <implementation name="IM_sqrt_vector2_genslang" nodedef="ND_sqrt_vector2" sourcecode="sqrt({{in}})" target="genslang" />
+  <implementation name="IM_sqrt_vector3_genslang" nodedef="ND_sqrt_vector3" sourcecode="sqrt({{in}})" target="genslang" />
+  <implementation name="IM_sqrt_vector4_genslang" nodedef="ND_sqrt_vector4" sourcecode="sqrt({{in}})" target="genslang" />
+
+  <!-- <ln> -->
+  <implementation name="IM_ln_float_genslang" nodedef="ND_ln_float" sourcecode="log({{in}})" target="genslang" />
+  <implementation name="IM_ln_vector2_genslang" nodedef="ND_ln_vector2" sourcecode="log({{in}})" target="genslang" />
+  <implementation name="IM_ln_vector3_genslang" nodedef="ND_ln_vector3" sourcecode="log({{in}})" target="genslang" />
+  <implementation name="IM_ln_vector4_genslang" nodedef="ND_ln_vector4" sourcecode="log({{in}})" target="genslang" />
+
+  <!-- <exp> -->
+  <implementation name="IM_exp_float_genslang" nodedef="ND_exp_float" sourcecode="exp({{in}})" target="genslang" />
+  <implementation name="IM_exp_vector2_genslang" nodedef="ND_exp_vector2" sourcecode="exp({{in}})" target="genslang" />
+  <implementation name="IM_exp_vector3_genslang" nodedef="ND_exp_vector3" sourcecode="exp({{in}})" target="genslang" />
+  <implementation name="IM_exp_vector4_genslang" nodedef="ND_exp_vector4" sourcecode="exp({{in}})" target="genslang" />
+
+  <!-- sign -->
+  <implementation name="IM_sign_float_genslang" nodedef="ND_sign_float" sourcecode="sign({{in}})" target="genslang" />
+  <implementation name="IM_sign_color3_genslang" nodedef="ND_sign_color3" sourcecode="sign({{in}})" target="genslang" />
+  <implementation name="IM_sign_color4_genslang" nodedef="ND_sign_color4" sourcecode="sign({{in}})" target="genslang" />
+  <implementation name="IM_sign_vector2_genslang" nodedef="ND_sign_vector2" sourcecode="sign({{in}})" target="genslang" />
+  <implementation name="IM_sign_vector3_genslang" nodedef="ND_sign_vector3" sourcecode="sign({{in}})" target="genslang" />
+  <implementation name="IM_sign_vector4_genslang" nodedef="ND_sign_vector4" sourcecode="sign({{in}})" target="genslang" />
+
+  <!-- <clamp> -->
+  <implementation name="IM_clamp_float_genslang" nodedef="ND_clamp_float" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_color3_genslang" nodedef="ND_clamp_color3" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_color3FA_genslang" nodedef="ND_clamp_color3FA" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_color4_genslang" nodedef="ND_clamp_color4" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_color4FA_genslang" nodedef="ND_clamp_color4FA" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_vector2_genslang" nodedef="ND_clamp_vector2" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_vector2FA_genslang" nodedef="ND_clamp_vector2FA" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_vector3_genslang" nodedef="ND_clamp_vector3" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_vector3FA_genslang" nodedef="ND_clamp_vector3FA" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_vector4_genslang" nodedef="ND_clamp_vector4" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+  <implementation name="IM_clamp_vector4FA_genslang" nodedef="ND_clamp_vector4FA" sourcecode="clamp({{in}}, {{low}}, {{high}})" target="genslang" />
+
+  <!-- <min> -->
+  <implementation name="IM_min_float_genslang" nodedef="ND_min_float" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_color3_genslang" nodedef="ND_min_color3" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_color3FA_genslang" nodedef="ND_min_color3FA" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_color4_genslang" nodedef="ND_min_color4" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_color4FA_genslang" nodedef="ND_min_color4FA" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_vector2_genslang" nodedef="ND_min_vector2" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_vector2FA_genslang" nodedef="ND_min_vector2FA" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_vector3_genslang" nodedef="ND_min_vector3" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_vector3FA_genslang" nodedef="ND_min_vector3FA" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_vector4_genslang" nodedef="ND_min_vector4" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_min_vector4FA_genslang" nodedef="ND_min_vector4FA" sourcecode="min({{in1}}, {{in2}})" target="genslang" />
+
+  <!-- <max> -->
+  <implementation name="IM_max_float_genslang" nodedef="ND_max_float" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_color3_genslang" nodedef="ND_max_color3" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_color3FA_genslang" nodedef="ND_max_color3FA" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_color4_genslang" nodedef="ND_max_color4" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_color4FA_genslang" nodedef="ND_max_color4FA" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_vector2_genslang" nodedef="ND_max_vector2" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_vector2FA_genslang" nodedef="ND_max_vector2FA" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_vector3_genslang" nodedef="ND_max_vector3" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_vector3FA_genslang" nodedef="ND_max_vector3FA" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_vector4_genslang" nodedef="ND_max_vector4" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_max_vector4FA_genslang" nodedef="ND_max_vector4FA" sourcecode="max({{in1}}, {{in2}})" target="genslang" />
+
+  <!-- <normalize> -->
+  <implementation name="IM_normalize_vector2_genslang" nodedef="ND_normalize_vector2" sourcecode="normalize({{in}})" target="genslang" />
+  <implementation name="IM_normalize_vector3_genslang" nodedef="ND_normalize_vector3" sourcecode="normalize({{in}})" target="genslang" />
+  <implementation name="IM_normalize_vector4_genslang" nodedef="ND_normalize_vector4" sourcecode="normalize({{in}})" target="genslang" />
+
+  <!-- <magnitude> -->
+  <implementation name="IM_magnitude_vector2_genslang" nodedef="ND_magnitude_vector2" sourcecode="length({{in}})" target="genslang" />
+  <implementation name="IM_magnitude_vector3_genslang" nodedef="ND_magnitude_vector3" sourcecode="length({{in}})" target="genslang" />
+  <implementation name="IM_magnitude_vector4_genslang" nodedef="ND_magnitude_vector4" sourcecode="length({{in}})" target="genslang" />
+
+  <!-- <dotproduct> -->
+  <implementation name="IM_dotproduct_vector2_genslang" nodedef="ND_dotproduct_vector2" sourcecode="dot({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_dotproduct_vector3_genslang" nodedef="ND_dotproduct_vector3" sourcecode="dot({{in1}}, {{in2}})" target="genslang" />
+  <implementation name="IM_dotproduct_vector4_genslang" nodedef="ND_dotproduct_vector4" sourcecode="dot({{in1}}, {{in2}})" target="genslang" />
+
+  <!-- <crossproduct> -->
+  <implementation name="IM_crossproduct_vector3_genslang" nodedef="ND_crossproduct_vector3" sourcecode="cross({{in1}}, {{in2}})" target="genslang" />
+
+  <!-- <transformpoint> -->
+  <implementation name="IM_transformpoint_vector3_genslang" nodedef="ND_transformpoint_vector3" sourcecode="mx_transform_point({{in}}, {{fromspace}}, {{tospace}}, objectFromWorld, worldFromObject)" target="genslang" />
+
+  <!-- <transformvector> -->
+  <implementation name="IM_transformvector_vector3_genslang" nodedef="ND_transformvector_vector3" sourcecode="mx_transform_vector({{in}}, {{fromspace}}, {{tospace}}, objectFromWorld, worldFromObject)" target="genslang" />
+
+  <!-- <transformnormal> -->
+  <implementation name="IM_transformnormal_vector3_genslang" nodedef="ND_transformnormal_vector3" sourcecode="mx_transform_normal({{in}}, {{fromspace}}, {{tospace}}, objectFromWorldIT, worldFromObjectIT)" target="genslang" />
+
+  <!-- <transformmatrix> -->
+  <implementation name="IM_transformmatrix_vector2M3_genslang" nodedef="ND_transformmatrix_vector2M3" sourcecode="mul({{mat}}, float3({{in}}, 1)).xy" target="genslang" />
+  <implementation name="IM_transformmatrix_vector3_genslang" nodedef="ND_transformmatrix_vector3" sourcecode="mul({{mat}}, {{in}})" target="genslang" />
+  <implementation name="IM_transformmatrix_vector3M4_genslang" nodedef="ND_transformmatrix_vector3M4" sourcecode="mul({{mat}}, float4({{in}}, 1)).xyz" target="genslang" />
+  <implementation name="IM_transformmatrix_vector4_genslang" nodedef="ND_transformmatrix_vector4" sourcecode="mul({{mat}}, {{in}}).xy" target="genslang" />
+
+  <!-- <transpose> -->
+  <implementation name="IM_transpose_matrix33_genslang" nodedef="ND_transpose_matrix33" sourcecode="transpose({{in}})" target="genslang" />
+  <implementation name="IM_transpose_matrix44_genslang" nodedef="ND_transpose_matrix44" sourcecode="transpose({{in}})" target="genslang" />
+
+  <!-- <determinant> -->
+  <implementation name="IM_determinant_matrix33_genslang" nodedef="ND_determinant_matrix33" sourcecode="determinant({{in}})" target="genslang" />
+  <implementation name="IM_determinant_matrix44_genslang" nodedef="ND_determinant_matrix44" sourcecode="determinant({{in}})" target="genslang" />
+
+  <!-- <invertmatrix> -->
+  <implementation name="IM_invertmatrix_matrix33_genslang" nodedef="ND_invertmatrix_matrix33" sourcecode="inverse({{in}})" target="genslang" />
+  <implementation name="IM_invertmatrix_matrix44_genslang" nodedef="ND_invertmatrix_matrix44" sourcecode="inverse({{in}})" target="genslang" />
+
+  <!-- <rotate2d> -->
+  <implementation name="IM_rotate2d_vector2_genslang" nodedef="ND_rotate2d_vector2" sourcecode="mx_rotate({{in}}, {{amount}})" target="genslang" />
+
+  <!-- <rotate3d> -->
+  <implementation name="IM_rotate3d_vector3_genslang" nodedef="ND_rotate3d_vector3" sourcecode="mx_rotate({{in}}, {{amount}}, {{axis}})" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Adjustment nodes                                                         -->
+  <!-- ======================================================================== -->
+
+  <!-- <remap> -->
+  <implementation name="IM_remap_float_genslang" nodedef="ND_remap_float" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_color3_genslang" nodedef="ND_remap_color3" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_color3FA_genslang" nodedef="ND_remap_color3FA" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_color4_genslang" nodedef="ND_remap_color4" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_color4FA_genslang" nodedef="ND_remap_color4FA" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_vector2_genslang" nodedef="ND_remap_vector2" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_vector2FA_genslang" nodedef="ND_remap_vector2FA" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_vector3_genslang" nodedef="ND_remap_vector3" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_vector3FA_genslang" nodedef="ND_remap_vector3FA" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_vector4_genslang" nodedef="ND_remap_vector4" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+  <implementation name="IM_remap_vector4FA_genslang" nodedef="ND_remap_vector4FA" sourcecode="{{outlow}} + ({{in}} - {{inlow}}) * ({{outhigh}} - {{outlow}}) / ({{inhigh}} - {{inlow}})" target="genslang" />
+
+  <!-- <smoothstep> -->
+  <implementation name="IM_smoothstep_float_genslang" nodedef="ND_smoothstep_float" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_color3_genslang" nodedef="ND_smoothstep_color3" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_color3FA_genslang" nodedef="ND_smoothstep_color3FA" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_color4_genslang" nodedef="ND_smoothstep_color4" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_color4FA_genslang" nodedef="ND_smoothstep_color4FA" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_vector2_genslang" nodedef="ND_smoothstep_vector2" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_vector2FA_genslang" nodedef="ND_smoothstep_vector2FA" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_vector3_genslang" nodedef="ND_smoothstep_vector3" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_vector3FA_genslang" nodedef="ND_smoothstep_vector3FA" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_vector4_genslang" nodedef="ND_smoothstep_vector4" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+  <implementation name="IM_smoothstep_vector4FA_genslang" nodedef="ND_smoothstep_vector4FA" sourcecode="smoothstep({{low}}, {{high}}, {{in}})" target="genslang" />
+
+  <!-- <luminance> -->
+  <implementation name="IM_luminance_color3_genslang" nodedef="ND_luminance_color3" sourcecode="dot({{in}}, {{lumacoeffs}})" target="genslang" />
+  <implementation name="IM_luminance_color4_genslang" nodedef="ND_luminance_color4" sourcecode="float4(float3(dot({{in}}.xyz, {{lumacoeffs}})), {{in}}.w)" target="genslang" />
+
+  <!-- <rgbtohsv> -->
+  <implementation name="IM_rgbtohsv_color3_genslang" nodedef="ND_rgbtohsv_color3" sourcecode="mx_rgbtohsv({{in}})" target="genslang" />
+  <implementation name="IM_rgbtohsv_color4_genslang" nodedef="ND_rgbtohsv_color4" sourcecode="float4(mx_rgbtohsv({{in}}.xyz), {{in}}.w)" target="genslang" />
+
+  <!-- <hsvtorgb> -->
+  <implementation name="IM_hsvtorgb_color3_genslang" nodedef="ND_hsvtorgb_color3" sourcecode="mx_hsvtorgb({{in}})" target="genslang" />
+  <implementation name="IM_hsvtorgb_color4_genslang" nodedef="ND_hsvtorgb_color4" sourcecode="float4(mx_hsvtorgb({{in}}.xyz), {{in}}.w)" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Compositing nodes                                                        -->
+  <!-- ======================================================================== -->
+
+  <!-- <premult> -->
+  <implementation name="IM_premult_color4_genslang" nodedef="ND_premult_color4" sourcecode="float4({{in}}.xyz * {{in}}.w, {{in}}.w)" target="genslang" />
+
+  <!-- <unpremult> -->
+  <implementation name="IM_unpremult_color4_genslang" nodedef="ND_unpremult_color4" sourcecode="float4({{in}}.xyz / {{in}}.w, {{in}}.w)" target="genslang" />
+
+  <!-- <plus> -->
+  <implementation name="IM_plus_float_genslang" nodedef="ND_plus_float" sourcecode="({{mix}}*({{bg}} + {{fg}})) + ((1.f-{{mix}})*{{bg}})" target="genslang" />
+  <implementation name="IM_plus_color3_genslang" nodedef="ND_plus_color3" sourcecode="({{mix}}*({{bg}} + {{fg}})) + ((1.f-{{mix}})*{{bg}})" target="genslang" />
+  <implementation name="IM_plus_color4_genslang" nodedef="ND_plus_color4" sourcecode="({{mix}}*({{bg}} + {{fg}})) + ((1.f-{{mix}})*{{bg}})" target="genslang" />
+
+  <!-- <minus> -->
+  <implementation name="IM_minus_float_genslang" nodedef="ND_minus_float" sourcecode="({{mix}}*({{bg}} - {{fg}})) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+  <implementation name="IM_minus_color3_genslang" nodedef="ND_minus_color3" sourcecode="({{mix}}*({{bg}} - {{fg}})) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+  <implementation name="IM_minus_color4_genslang" nodedef="ND_minus_color4" sourcecode="({{mix}}*({{bg}} - {{fg}})) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+
+  <!-- <difference> -->
+  <implementation name="IM_difference_float_genslang" nodedef="ND_difference_float" file="({{mix}}*abs({{bg}} - {{fg}})) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+  <implementation name="IM_difference_color3_genslang" nodedef="ND_difference_color3" file="({{mix}}*abs({{bg}} - {{fg}})) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+  <implementation name="IM_difference_color4_genslang" nodedef="ND_difference_color4" file="({{mix}}*abs({{bg}} - {{fg}})) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+
+  <!-- <burn> -->
+  <implementation name="IM_burn_float_genslang" nodedef="ND_burn_float" sourcecode="mx_burn({{fg}}, {{bg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_burn_color3_genslang" nodedef="ND_burn_color3" sourcecode="mx_burn({{fg}}, {{bg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_burn_color4_genslang" nodedef="ND_burn_color4" sourcecode="mx_burn({{fg}}, {{bg}}, {{mix}})" target="genslang" />
+
+  <!-- <dodge> -->
+  <implementation name="IM_dodge_float_genslang" nodedef="ND_dodge_float" sourcecode="mx_dodge({{fg}}, {{bg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_dodge_color3_genslang" nodedef="ND_dodge_color3" sourcecode="mx_dodge({{fg}}, {{bg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_dodge_color4_genslang" nodedef="ND_dodge_color4" sourcecode="mx_dodge({{fg}}, {{bg}}, {{mix}})" target="genslang" />
+
+  <!-- <screen> -->
+  <implementation name="IM_screen_float_genslang" nodedef="ND_screen_float" sourcecode="({{mix}}*((1.0 - (1.0 - {{fg}})) * (1.0 - {{bg}}))) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+  <implementation name="IM_screen_color3_genslang" nodedef="ND_screen_color3" sourcecode="({{mix}}*((1.0 - (1.0 - {{fg}})) * (1.0 - {{bg}}))) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+  <implementation name="IM_screen_color4_genslang" nodedef="ND_screen_color4" sourcecode="({{mix}}*((1.0 - (1.0 - {{fg}})) * (1.0 - {{bg}}))) + ((1.0-{{mix}})*{{bg}})" target="genslang" />
+
+  <!-- <overlay> -->
+  <implementation name="IM_overlay_float_genslang" nodedef="ND_overlay_float" sourcecode="mx_overlay({{fg}}, {{bg}})" target="genslang" />
+  <implementation name="IM_overlay_color3_genslang" nodedef="ND_overlay_color3" sourcecode="mx_overlay({{fg}}, {{bg}})" target="genslang" />
+  <implementation name="IM_overlay_color4_genslang" nodedef="ND_overlay_color4" sourcecode="mx_overlay({{fg}}, {{bg}})" target="genslang" />
+
+  <!-- <disjointover> -->
+  <implementation name="IM_disjointover_color4_genslang" nodedef="ND_disjointover_color4" sourcecode="mx_disjointover({{fg}}, {{bg}}, {{mix}})" target="genslang" />
+
+  <!-- <in> -->
+  <implementation name="IM_in_color4_genslang" nodedef="ND_in_color4" sourcecode="({{fg}}*{{bg}}.a  * {{mix}}) + ({{bg}} * (1.0-{{mix}}))" target="genslang" />
+
+  <!-- <mask> -->
+  <implementation name="IM_mask_color4_genslang" nodedef="ND_mask_color4" sourcecode="({{bg}}*{{fg}}.a  * {{mix}}) + ({{bg}} * (1.0-{{mix}}))" target="genslang" />
+
+  <!-- <matte> -->
+  <implementation name="IM_matte_color4_genslang" nodedef="ND_matte_color4" sourcecode="float4( {{fg}}.xyz*{{fg}}.w + {{bg}}.xyz*(1.0-{{fg}}.w), {{fg}}.w + ({{bg}}.w*(1.0-{{fg}}.w)) ) * {{mix}} + ({{bg}} * (1.0-{{mix}}))" target="genslang" />
+
+  <!-- <out> -->
+  <implementation name="IM_out_color4_genslang" nodedef="ND_out_color4" sourcecode="({{fg}}*(1.0-{{bg}}.a)  * {{mix}}) + ({{bg}} * (1.0-{{mix}}))" target="genslang" />
+
+  <!-- <over> -->
+  <implementation name="IM_over_color4_genslang" nodedef="ND_over_color4" sourcecode="({{fg}} + ({{bg}}*(1.0-{{fg}}[3]))) * {{mix}} + {{bg}} * (1.0-{{mix}})" target="genslang" />
+
+  <!-- <inside> -->
+  <implementation name="IM_inside_float_genslang" nodedef="ND_inside_float" sourcecode="{{in}} * {{mask}}" target="genslang" />
+  <implementation name="IM_inside_color3_genslang" nodedef="ND_inside_color3" sourcecode="{{in}} * {{mask}}" target="genslang" />
+  <implementation name="IM_inside_color4_genslang" nodedef="ND_inside_color4" sourcecode="{{in}} * {{mask}}" target="genslang" />
+
+  <!-- <outside> -->
+  <implementation name="IM_outside_float_genslang" nodedef="ND_outside_float" sourcecode="{{in}} * (1.0 - {{mask}})" target="genslang" />
+  <implementation name="IM_outside_color3_genslang" nodedef="ND_outside_color3" sourcecode="{{in}} * (1.0 - {{mask}})" target="genslang" />
+  <implementation name="IM_outside_color4_genslang" nodedef="ND_outside_color4" sourcecode="{{in}} * (1.0 - {{mask}})" target="genslang" />
+
+  <!-- <mix> -->
+  <implementation name="IM_mix_float_genslang" nodedef="ND_mix_float" sourcecode="lerp({{bg}}, {{fg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_mix_color3_genslang" nodedef="ND_mix_color3" sourcecode="lerp({{bg}}, {{fg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_mix_color4_genslang" nodedef="ND_mix_color4" sourcecode="lerp({{bg}}, {{fg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_mix_vector2_genslang" nodedef="ND_mix_vector2" sourcecode="lerp({{bg}}, {{fg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_mix_vector3_genslang" nodedef="ND_mix_vector3" sourcecode="lerp({{bg}}, {{fg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_mix_vector4_genslang" nodedef="ND_mix_vector4" sourcecode="lerp({{bg}}, {{fg}}, {{mix}})" target="genslang" />
+  <implementation name="IM_mix_surfaceshader_genslang" nodedef="ND_mix_surfaceshader" sourcecode="/* UNIMPLEMENTED ND_mix_surfaceshader */" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Conditional nodes                                                        -->
+  <!-- ======================================================================== -->
+
+  <!-- <ifgreater> -->
+  <implementation name="IM_ifgreater_float_genslang" nodedef="ND_ifgreater_float" target="genslang" />
+  <implementation name="IM_ifgreater_color3_genslang" nodedef="ND_ifgreater_color3" target="genslang" />
+  <implementation name="IM_ifgreater_color4_genslang" nodedef="ND_ifgreater_color4" target="genslang" />
+  <implementation name="IM_ifgreater_vector2_genslang" nodedef="ND_ifgreater_vector2" target="genslang" />
+  <implementation name="IM_ifgreater_vector3_genslang" nodedef="ND_ifgreater_vector3" target="genslang" />
+  <implementation name="IM_ifgreater_vector4_genslang" nodedef="ND_ifgreater_vector4" target="genslang" />
+  <implementation name="IM_ifgreater_floatI_genslang" nodedef="ND_ifgreater_floatI" target="genslang" />
+  <implementation name="IM_ifgreater_color3I_genslang" nodedef="ND_ifgreater_color3I" target="genslang" />
+  <implementation name="IM_ifgreater_color4I_genslang" nodedef="ND_ifgreater_color4I" target="genslang" />
+  <implementation name="IM_ifgreater_vector2I_genslang" nodedef="ND_ifgreater_vector2I" target="genslang" />
+  <implementation name="IM_ifgreater_vector3I_genslang" nodedef="ND_ifgreater_vector3I" target="genslang" />
+  <implementation name="IM_ifgreater_vector4I_genslang" nodedef="ND_ifgreater_vector4I" target="genslang" />
+
+  <!-- <ifgreatereq> -->
+  <implementation name="IM_ifgreatereq_float_genslang" nodedef="ND_ifgreatereq_float" target="genslang" />
+  <implementation name="IM_ifgreatereq_color3_genslang" nodedef="ND_ifgreatereq_color3" target="genslang" />
+  <implementation name="IM_ifgreatereq_color4_genslang" nodedef="ND_ifgreatereq_color4" target="genslang" />
+  <implementation name="IM_ifgreatereq_vector2_genslang" nodedef="ND_ifgreatereq_vector2" target="genslang" />
+  <implementation name="IM_ifgreatereq_vector3_genslang" nodedef="ND_ifgreatereq_vector3" target="genslang" />
+  <implementation name="IM_ifgreatereq_vector4_genslang" nodedef="ND_ifgreatereq_vector4" target="genslang" />
+  <implementation name="IM_ifgreatereq_floatI_genslang" nodedef="ND_ifgreatereq_floatI" target="genslang" />
+  <implementation name="IM_ifgreatereq_color3I_genslang" nodedef="ND_ifgreatereq_color3I" target="genslang" />
+  <implementation name="IM_ifgreatereq_color4I_genslang" nodedef="ND_ifgreatereq_color4I" target="genslang" />
+  <implementation name="IM_ifgreatereq_vector2I_genslang" nodedef="ND_ifgreatereq_vector2I" target="genslang" />
+  <implementation name="IM_ifgreatereq_vector3I_genslang" nodedef="ND_ifgreatereq_vector3I" target="genslang" />
+  <implementation name="IM_ifgreatereq_vector4I_genslang" nodedef="ND_ifgreatereq_vector4I" target="genslang" />
+
+  <!-- <ifequal> -->
+  <implementation name="IM_ifequal_float_genslang" nodedef="ND_ifequal_float" target="genslang" />
+  <implementation name="IM_ifequal_color3_genslang" nodedef="ND_ifequal_color3" target="genslang" />
+  <implementation name="IM_ifequal_color4_genslang" nodedef="ND_ifequal_color4" target="genslang" />
+  <implementation name="IM_ifequal_vector2_genslang" nodedef="ND_ifequal_vector2" target="genslang" />
+  <implementation name="IM_ifequal_vector3_genslang" nodedef="ND_ifequal_vector3" target="genslang" />
+  <implementation name="IM_ifequal_vector4_genslang" nodedef="ND_ifequal_vector4" target="genslang" />
+  <implementation name="IM_ifequal_floatI_genslang" nodedef="ND_ifequal_floatI" target="genslang" />
+  <implementation name="IM_ifequal_color3I_genslang" nodedef="ND_ifequal_color3I" target="genslang" />
+  <implementation name="IM_ifequal_color4I_genslang" nodedef="ND_ifequal_color4I" target="genslang" />
+  <implementation name="IM_ifequal_vector2I_genslang" nodedef="ND_ifequal_vector2I" target="genslang" />
+  <implementation name="IM_ifequal_vector3I_genslang" nodedef="ND_ifequal_vector3I" target="genslang" />
+  <implementation name="IM_ifequal_vector4I_genslang" nodedef="ND_ifequal_vector4I" target="genslang" />
+  <implementation name="IM_ifequal_floatB_genslang" nodedef="ND_ifequal_floatB" target="genslang" />
+  <implementation name="IM_ifequal_color3B_genslang" nodedef="ND_ifequal_color3B" target="genslang" />
+  <implementation name="IM_ifequal_color4B_genslang" nodedef="ND_ifequal_color4B" target="genslang" />
+  <implementation name="IM_ifequal_vector2B_genslang" nodedef="ND_ifequal_vector2B" target="genslang" />
+  <implementation name="IM_ifequal_vector3B_genslang" nodedef="ND_ifequal_vector3B" target="genslang" />
+  <implementation name="IM_ifequal_vector4B_genslang" nodedef="ND_ifequal_vector4B" target="genslang" />
+
+  <!-- <switch> -->
+  <!-- 'which' type : float -->
+  <implementation name="IM_switch_float_genslang" nodedef="ND_switch_float" target="genslang" />
+  <implementation name="IM_switch_color3_genslang" nodedef="ND_switch_color3" target="genslang" />
+  <implementation name="IM_switch_color4_genslang" nodedef="ND_switch_color4" target="genslang" />
+  <implementation name="IM_switch_vector2_genslang" nodedef="ND_switch_vector2" target="genslang" />
+  <implementation name="IM_switch_vector3_genslang" nodedef="ND_switch_vector3" target="genslang" />
+  <implementation name="IM_switch_vector4_genslang" nodedef="ND_switch_vector4" target="genslang" />
+  <!-- 'which' type : integer -->
+  <implementation name="IM_switch_floatI_genslang" nodedef="ND_switch_floatI" target="genslang" />
+  <implementation name="IM_switch_color3I_genslang" nodedef="ND_switch_color3I" target="genslang" />
+  <implementation name="IM_switch_color4I_genslang" nodedef="ND_switch_color4I" target="genslang" />
+  <implementation name="IM_switch_vector2I_genslang" nodedef="ND_switch_vector2I" target="genslang" />
+  <implementation name="IM_switch_vector3I_genslang" nodedef="ND_switch_vector3I" target="genslang" />
+  <implementation name="IM_switch_vector4I_genslang" nodedef="ND_switch_vector4I" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Channel nodes                                                            -->
+  <!-- ======================================================================== -->
+
+  <!-- <convert> -->
+  <implementation name="IM_convert_float_color3_genslang" nodedef="ND_convert_float_color3" target="genslang" />
+  <implementation name="IM_convert_float_color4_genslang" nodedef="ND_convert_float_color4" target="genslang" />
+  <implementation name="IM_convert_float_vector2_genslang" nodedef="ND_convert_float_vector2" target="genslang" />
+  <implementation name="IM_convert_float_vector3_genslang" nodedef="ND_convert_float_vector3" target="genslang" />
+  <implementation name="IM_convert_float_vector4_genslang" nodedef="ND_convert_float_vector4" target="genslang" />
+  <implementation name="IM_convert_vector2_vector3_genslang" nodedef="ND_convert_vector2_vector3" target="genslang" />
+  <implementation name="IM_convert_vector3_vector2_genslang" nodedef="ND_convert_vector3_vector2" target="genslang" />
+  <implementation name="IM_convert_vector3_color3_genslang" nodedef="ND_convert_vector3_color3" target="genslang" />
+  <implementation name="IM_convert_vector3_vector4_genslang" nodedef="ND_convert_vector3_vector4" target="genslang" />
+  <implementation name="IM_convert_vector4_vector3_genslang" nodedef="ND_convert_vector4_vector3" target="genslang" />
+  <implementation name="IM_convert_vector4_color4_genslang" nodedef="ND_convert_vector4_color4" target="genslang" />
+  <implementation name="IM_convert_color3_vector3_genslang" nodedef="ND_convert_color3_vector3" target="genslang" />
+  <implementation name="IM_convert_color4_vector4_genslang" nodedef="ND_convert_color4_vector4" target="genslang" />
+  <implementation name="IM_convert_color3_color4_genslang" nodedef="ND_convert_color3_color4" target="genslang" />
+  <implementation name="IM_convert_color4_color3_genslang" nodedef="ND_convert_color4_color3" target="genslang" />
+  <implementation name="IM_convert_boolean_float_genslang" nodedef="ND_convert_boolean_float" target="genslang" />
+  <implementation name="IM_convert_integer_float_genslang" nodedef="ND_convert_integer_float" target="genslang" />
+
+  <!-- <swizzle> -->
+  <!-- from type: float -->
+  <implementation name="IM_swizzle_float_color3_genslang" nodedef="ND_swizzle_float_color3" target="genslang" />
+  <implementation name="IM_swizzle_float_color4_genslang" nodedef="ND_swizzle_float_color4" target="genslang" />
+  <implementation name="IM_swizzle_float_vector2_genslang" nodedef="ND_swizzle_float_vector2" target="genslang" />
+  <implementation name="IM_swizzle_float_vector3_genslang" nodedef="ND_swizzle_float_vector3" target="genslang" />
+  <implementation name="IM_swizzle_float_vector4_genslang" nodedef="ND_swizzle_float_vector4" target="genslang" />
+  <!-- from type: color3 -->
+  <implementation name="IM_swizzle_color3_float_genslang" nodedef="ND_swizzle_color3_float" target="genslang" />
+  <implementation name="IM_swizzle_color3_color3_genslang" nodedef="ND_swizzle_color3_color3" target="genslang" />
+  <implementation name="IM_swizzle_color3_color4_genslang" nodedef="ND_swizzle_color3_color4" target="genslang" />
+  <implementation name="IM_swizzle_color3_vector2_genslang" nodedef="ND_swizzle_color3_vector2" target="genslang" />
+  <implementation name="IM_swizzle_color3_vector3_genslang" nodedef="ND_swizzle_color3_vector3" target="genslang" />
+  <implementation name="IM_swizzle_color3_vector4_genslang" nodedef="ND_swizzle_color3_vector4" target="genslang" />
+  <!-- from type: color4 -->
+  <implementation name="IM_swizzle_color4_float_genslang" nodedef="ND_swizzle_color4_float" target="genslang" />
+  <implementation name="IM_swizzle_color4_color3_genslang" nodedef="ND_swizzle_color4_color3" target="genslang" />
+  <implementation name="IM_swizzle_color4_color4_genslang" nodedef="ND_swizzle_color4_color4" target="genslang" />
+  <implementation name="IM_swizzle_color4_vector2_genslang" nodedef="ND_swizzle_color4_vector2" target="genslang" />
+  <implementation name="IM_swizzle_color4_vector3_genslang" nodedef="ND_swizzle_color4_vector3" target="genslang" />
+  <implementation name="IM_swizzle_color4_vector4_genslang" nodedef="ND_swizzle_color4_vector4" target="genslang" />
+  <!-- from type: vector2 -->
+  <implementation name="IM_swizzle_vector2_float_genslang" nodedef="ND_swizzle_vector2_float" target="genslang" />
+  <implementation name="IM_swizzle_vector2_color3_genslang" nodedef="ND_swizzle_vector2_color3" target="genslang" />
+  <implementation name="IM_swizzle_vector2_color4_genslang" nodedef="ND_swizzle_vector2_color4" target="genslang" />
+  <implementation name="IM_swizzle_vector2_vector2_genslang" nodedef="ND_swizzle_vector2_vector2" target="genslang" />
+  <implementation name="IM_swizzle_vector2_vector3_genslang" nodedef="ND_swizzle_vector2_vector3" target="genslang" />
+  <implementation name="IM_swizzle_vector2_vector4_genslang" nodedef="ND_swizzle_vector2_vector4" target="genslang" />
+  <!-- from type: vector3 -->
+  <implementation name="IM_swizzle_vector3_float_genslang" nodedef="ND_swizzle_vector3_float" target="genslang" />
+  <implementation name="IM_swizzle_vector3_color3_genslang" nodedef="ND_swizzle_vector3_color3" target="genslang" />
+  <implementation name="IM_swizzle_vector3_color4_genslang" nodedef="ND_swizzle_vector3_color4" target="genslang" />
+  <implementation name="IM_swizzle_vector3_vector2_genslang" nodedef="ND_swizzle_vector3_vector2" target="genslang" />
+  <implementation name="IM_swizzle_vector3_vector3_genslang" nodedef="ND_swizzle_vector3_vector3" target="genslang" />
+  <implementation name="IM_swizzle_vector3_vector4_genslang" nodedef="ND_swizzle_vector3_vector4" target="genslang" />
+  <!-- from type: vector4 -->
+  <implementation name="IM_swizzle_vector4_float_genslang" nodedef="ND_swizzle_vector4_float" target="genslang" />
+  <implementation name="IM_swizzle_vector4_color3_genslang" nodedef="ND_swizzle_vector4_color3" target="genslang" />
+  <implementation name="IM_swizzle_vector4_color4_genslang" nodedef="ND_swizzle_vector4_color4" target="genslang" />
+  <implementation name="IM_swizzle_vector4_vector2_genslang" nodedef="ND_swizzle_vector4_vector2" target="genslang" />
+  <implementation name="IM_swizzle_vector4_vector3_genslang" nodedef="ND_swizzle_vector4_vector3" target="genslang" />
+  <implementation name="IM_swizzle_vector4_vector4_genslang" nodedef="ND_swizzle_vector4_vector4" target="genslang" />
+
+  <!-- <combine2> -->
+  <implementation name="IM_combine2_vector2_genslang" nodedef="ND_combine2_vector2" target="genslang" />
+  <implementation name="IM_combine2_color4CF_genslang" nodedef="ND_combine2_color4CF" target="genslang" />
+  <implementation name="IM_combine2_vector4VF_genslang" nodedef="ND_combine2_vector4VF" target="genslang" />
+  <implementation name="IM_combine2_vector4VV_genslang" nodedef="ND_combine2_vector4VV" target="genslang" />
+
+  <!-- <combine3> -->
+  <implementation name="IM_combine3_color3_genslang" nodedef="ND_combine3_color3" target="genslang" />
+  <implementation name="IM_combine3_vector3_genslang" nodedef="ND_combine3_vector3" target="genslang" />
+
+  <!-- <combine4> -->
+  <implementation name="IM_combine4_color4_genslang" nodedef="ND_combine4_color4" target="genslang" />
+  <implementation name="IM_combine4_vector4_genslang" nodedef="ND_combine4_vector4" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Convolution nodes                                                        -->
+  <!-- ======================================================================== -->
+
+  <!-- <blur> -->
+  <implementation name="IM_blur_float_genslang" nodedef="ND_blur_float" target="genslang" />
+  <implementation name="IM_blur_color3_genslang" nodedef="ND_blur_color3" target="genslang" />
+  <implementation name="IM_blur_color4_genslang" nodedef="ND_blur_color4" target="genslang" />
+  <implementation name="IM_blur_vector2_genslang" nodedef="ND_blur_vector2" target="genslang" />
+  <implementation name="IM_blur_vector3_genslang" nodedef="ND_blur_vector3" target="genslang" />
+  <implementation name="IM_blur_vector4_genslang" nodedef="ND_blur_vector4" target="genslang" />
+
+  <!-- <heighttonormal> -->
+  <implementation name="IM_heighttonormal_vector3_genslang" nodedef="ND_heighttonormal_vector3" sourcecode="/* UNIMPLEMENTED ND_heighttonormal_vector3 */" target="genslang" />
+
+  <!-- ======================================================================== -->
+  <!-- Organization nodes                                                       -->
+  <!-- ======================================================================== -->
+
+  <!-- <dot> -->
+  <implementation name="IM_dot_float_genslang" nodedef="ND_dot_float" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_color3_genslang" nodedef="ND_dot_color3" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_color4_genslang" nodedef="ND_dot_color4" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_vector2_genslang" nodedef="ND_dot_vector2" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_vector3_genslang" nodedef="ND_dot_vector3" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_vector4_genslang" nodedef="ND_dot_vector4" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_boolean_genslang" nodedef="ND_dot_boolean" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_integer_genslang" nodedef="ND_dot_integer" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_matrix33_genslang" nodedef="ND_dot_matrix33" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_matrix44_genslang" nodedef="ND_dot_matrix44" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_string_genslang" nodedef="ND_dot_string" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_filename_genslang" nodedef="ND_dot_filename" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_surfaceshader_genslang" nodedef="ND_dot_surfaceshader" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_displacementshader_genslang" nodedef="ND_dot_displacementshader" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_volumeshader_genslang" nodedef="ND_dot_volumeshader" file="mx_dot.inline" target="genslang" />
+  <implementation name="IM_dot_lightshader_genslang" nodedef="ND_dot_lightshader" file="mx_dot.inline" target="genslang" />
+
+</materialx>

@@ -1,0 +1,81 @@
+/***************************************************************************
+ # Copyright (c) 2015-23, NVIDIA CORPORATION. All rights reserved.
+ #
+ # NVIDIA CORPORATION and its licensors retain all intellectual property
+ # and proprietary rights in and to this software, related documentation
+ # and any modifications thereto.  Any use, reproduction, disclosure or
+ # distribution of this software and related documentation without an express
+ # license agreement from NVIDIA CORPORATION is strictly prohibited.
+ **************************************************************************/
+#pragma once
+#include "Utils/HostDeviceShared.slangh"
+
+BEGIN_NAMESPACE_FALCOR
+
+// -------------------------------------------------------------------------
+//
+// This file defines shared types used on the CPU and GPU side
+// for neural materials.
+//
+// To add a new neural material type.
+//
+//  1. Add an enum below. This is used on the host/shader side.
+//  2. Add the string name for the type. This is used in the JSON file.
+//
+// -------------------------------------------------------------------------
+
+enum class NeuralMaterialSamplingStrategy : uint32_t
+{
+    // clang-format off
+    Unknown,
+
+    CosineWiImportanceWo,   // Cosine-weighted wi + importance sampled wo
+    UniformWiImportanceWo,  // Uniform wi + importance sampled wo
+    UniformRusinkiewicz,    // Uniform theta_h, theta_d, phi_h, phi_d transformed to wi/wo
+    BalancedRusinkiewicz,   // Mix between `UniformRusinkiewicz` and uniform wi + importance sampled wo
+    UniformWiBalancedWo,    // Uniform wi + mix between uniform and importance sampled wo
+    UniformWiUniformWo,     // Uniform wi + uniform wo
+
+    // Add more strategies here...
+    // clang-format on
+
+    Count // Must be last
+};
+
+FALCOR_ENUM_INFO(
+    NeuralMaterialSamplingStrategy,
+    {
+        { NeuralMaterialSamplingStrategy::Unknown, "Unknown" },
+        { NeuralMaterialSamplingStrategy::CosineWiImportanceWo, "CosineWiImportanceWo" },
+        { NeuralMaterialSamplingStrategy::UniformWiImportanceWo, "UniformWiImportanceWo" },
+        { NeuralMaterialSamplingStrategy::UniformRusinkiewicz, "UniformRusinkiewicz" },
+        { NeuralMaterialSamplingStrategy::BalancedRusinkiewicz, "BalancedRusinkiewicz" },
+        { NeuralMaterialSamplingStrategy::UniformWiBalancedWo, "UniformWiBalancedWo" },
+        { NeuralMaterialSamplingStrategy::UniformWiUniformWo, "UniformWiUniformWo" },
+    }
+);
+FALCOR_ENUM_REGISTER(NeuralMaterialSamplingStrategy);
+
+// TODO: move this to a separate file
+// Flags describing valid data in the MaterialSample struct.
+// Used to describe valid entries when the samples are provided from outside of Falcor.
+enum class SampleBufferContentDesc : uint32_t
+{
+    None = 0,
+    UV = 1,
+    Wi = 2,
+    Wo = 4,
+};
+
+FALCOR_ENUM_INFO(
+    SampleBufferContentDesc,
+    {
+        { SampleBufferContentDesc::None, "None" },
+        { SampleBufferContentDesc::UV, "UV" },
+        { SampleBufferContentDesc::Wi, "Wi" },
+        { SampleBufferContentDesc::Wo, "Wo" },
+    }
+);
+FALCOR_ENUM_REGISTER(SampleBufferContentDesc);
+
+END_NAMESPACE_FALCOR

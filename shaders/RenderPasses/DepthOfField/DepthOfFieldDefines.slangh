@@ -1,0 +1,34 @@
+/***************************************************************************
+ # Copyright (c) 2015-22, NVIDIA CORPORATION. All rights reserved.
+ #
+ # NVIDIA CORPORATION and its licensors retain all intellectual property
+ # and proprietary rights in and to this software, related documentation
+ # and any modifications thereto.  Any use, reproduction, disclosure or
+ # distribution of this software and related documentation without an express
+ # license agreement from NVIDIA CORPORATION is strictly prohibited.
+ **************************************************************************/
+#include "Utils/Math/MathConstants.slangh"
+
+#define BOKEH_MIP_LEVELS 4
+#define INDIRECT_SEPARATION 128
+
+#define CLASSIFY_GROUP_SIZE 16
+
+// This will cause the bokeh to move into higher mip level (this is not related to the thresholds)
+// lowering this will reduce pressure from raster/blending
+// the "danger" is that bokeh's will have smooth transitions (while bokehs are very sharp features)
+// this can be helped with a good upsampler
+#define MAX_RADIUS 8
+
+// Radius smaller than this (in pixels) won't splat
+#define SMALLEST_RADIUS 1.0f
+
+// Radius will be clamped to this prior to blurring
+#define LARGEST_RADIUS 128
+
+// these mangitues are in pixels, and define thresholds when a single radius will replace all the bokehs in the neighborhood
+// lowering these will reduce pressure from vertex processing and raster/blending
+// the "danger" is that some bokehs will be incorrect
+#define EIGHTH_RES_THRESHOLD 64
+#define QUARTER_RES_THRESHOLD 32
+#define HALF_RES_THRESHOLD 4
