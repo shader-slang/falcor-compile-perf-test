@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#define PATH_MAX 1024
+
 #define ASSERT(x)               \
     do {                        \
         if (!(x)) {              \
@@ -54,6 +56,45 @@ inline SlangStage getSlangStage(ShaderType type)
     }
 }
 
+#if defined(Linux)
+#include <filesystem>
+#include <unistd.h>
+inline const std::filesystem::path& getExecutablePath()
+{
+    static std::filesystem::path path(
+        []()
+        {
+            char pathStr[PATH_MAX] = {0};
+            if (readlink("/proc/self/exe", pathStr, PATH_MAX) == -1)
+            {
+                assert(!"Failed to get the executable path.");
+            }
+            return std::filesystem::path(pathStr);
+        }()
+    );
+    return path;
+}
+#elif defined(Windows)
+#include <windows.h>
+inline const std::filesystem::path& getExecutablePath()
+{
+    static std::filesystem::path path(
+        []()
+        {
+            CHAR pathStr[1024];
+            if (GetModuleFileNameA(nullptr, pathStr, ARRAYSIZE(pathStr)) == 0)
+            {
+                assert(!"Failed to get the executable path.");
+            }
+            return std::filesystem::path(pathStr);
+        }()
+    );
+    return path;
+}
+#else
+#error "No OS specified"
+#endif
+
 inline std::string getSlangProfileString(ShaderModel shaderModel)
 {
     char buffer[80];
@@ -63,7 +104,8 @@ inline std::string getSlangProfileString(ShaderModel shaderModel)
 
 inline std::vector<std::filesystem::path> getInitialShaderDirectories()
 {
-    static std::filesystem::path directory("/home/zhangkai/Documents/slangwork/slang/examples/perf-path-tracing/shaders");
+    static std::filesystem::path directory = getExecutablePath().parent_path() / "shaders";
+    printf("shader path = %s\n", directory.string().c_str());
 
     std::vector<std::filesystem::path> developmentDirectories = { directory };
 

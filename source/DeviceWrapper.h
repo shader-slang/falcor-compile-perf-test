@@ -47,7 +47,7 @@ public:
         gfxDesc.deviceType = gfx::DeviceType::Vulkan;
         gfxDesc.slang.slangGlobalSession = m_slangGlobalSession;
         gfxDesc.shaderCache.maxEntryCount = 1000;
-        gfxDesc.shaderCache.shaderCachePath = "";
+        gfxDesc.shaderCache.shaderCachePath = nullptr;
 
         std::vector<void*> extendedDescs;
         // Add extended desc for root parameter attribute.

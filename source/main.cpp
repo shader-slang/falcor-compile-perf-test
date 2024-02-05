@@ -119,7 +119,6 @@ void TestCase(ref<Device>& device)
         device->getProgramManager()->reloadAllPrograms();
         device->getProgramManager()->setSpirvDirectMode(true);
     }
-
 }
 
 int main(int argc, char* argv[])
