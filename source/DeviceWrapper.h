@@ -6,7 +6,12 @@
 #include "Types.h"
 #include "Object.h"
 #include "ProgramManager.h"
+#include <vulkan/vulkan.h>
+#include <dlfcn.h>
+#include "CpuTimer.h"
+
 class ProgramManager;
+class PipelineCreationAPIDispatcher;
 
 class GFXDebugCallBack : public gfx::IDebugCallback
 {
@@ -29,6 +34,123 @@ class GFXDebugCallBack : public gfx::IDebugCallback
 
 static GFXDebugCallBack gGFXDebugCallBack; // TODO: REMOVEGLOBAL
 
+class PipelineCreationAPIDispatcher : public gfx::IPipelineCreationAPIDispatcher
+{
+public:
+    PipelineCreationAPIDispatcher() { }
+    ~PipelineCreationAPIDispatcher() { }
+
+    double getPipelineCreationTime() {return m_timer.delta();}
+
+    virtual SLANG_NO_THROW SlangResult SLANG_MCALL queryInterface(SlangUUID const& uuid, void** outObject) override
+    {
+        if (uuid == SlangUUID SLANG_UUID_IPipelineCreationAPIDispatcher)
+        {
+            *outObject = static_cast<gfx::IPipelineCreationAPIDispatcher*>(this);
+            return SLANG_OK;
+        }
+        return SLANG_E_NO_INTERFACE;
+    }
+
+    // The lifetime of this dispatcher object will be managed by `Falcor::Device` so we don't need
+    // to actually implement reference counting here.
+    virtual SLANG_NO_THROW uint32_t SLANG_MCALL addRef() override { return 2; }
+
+    virtual SLANG_NO_THROW uint32_t SLANG_MCALL release() override { return 2; }
+
+    // This method will be called by the gfx layer to create an API object for a compute pipeline state.
+    virtual gfx::Result createComputePipelineState(
+        gfx::IDevice* device,
+        slang::IComponentType* program,
+        void* pipelineDesc,
+        void** outPipelineState
+    )
+    {
+        void* vulkanLibraryHandle = nullptr;
+        const char* dynamicLibraryName = "Unknown";
+        dynamicLibraryName = "libvulkan.so.1";
+        vulkanLibraryHandle = dlopen(dynamicLibraryName, RTLD_NOW);
+
+        gfx::IDevice::InteropHandles outHandles;
+        device->getNativeDeviceHandles(&outHandles);
+
+        VkInstance instance;
+        instance = (VkInstance)outHandles.handles[0].handleValue;
+
+        VkDevice vkDevice;
+        vkDevice = (VkDevice)outHandles.handles[2].handleValue;
+
+        PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = nullptr;
+        vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlsym(vulkanLibraryHandle, "vkGetInstanceProcAddr");
+        if (!vkGetInstanceProcAddr)
+        {
+            assert(!"Fail to get instance proc address");
+        }
+
+        PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = nullptr;
+        vkGetDeviceProcAddr = (PFN_vkGetDeviceProcAddr)vkGetInstanceProcAddr(instance, "vkGetDeviceProcAddr");
+        if (!vkGetDeviceProcAddr)
+        {
+            assert(!"Fail to get device proc address");
+        }
+
+        PFN_vkCreateComputePipelines vkCreateComputePipelines = nullptr;
+        vkCreateComputePipelines = (PFN_vkCreateComputePipelines)vkGetDeviceProcAddr(vkDevice, "vkCreateComputePipelines");
+        if (!vkCreateComputePipelines)
+        {
+            assert(!"Fail to vkCreateComputePipelines");
+        }
+
+        m_timer.update();
+
+        VkPipelineCache pipelineCache = VK_NULL_HANDLE;
+        VkComputePipelineCreateInfo* pComputePipelineInfo = static_cast<VkComputePipelineCreateInfo*>(pipelineDesc);
+        VkPipeline pipeline;
+        vkCreateComputePipelines(
+            vkDevice, pipelineCache, 1, pComputePipelineInfo, nullptr, &pipeline);
+
+        *((VkPipeline*)outPipelineState) = pipeline;
+        m_timer.update();
+        return SLANG_OK;
+    }
+
+    // This method will be called by the gfx layer to create an API object for a graphics pipeline state.
+    virtual gfx::Result createGraphicsPipelineState(
+        gfx::IDevice* device,
+        slang::IComponentType* program,
+        void* pipelineDesc,
+        void** outPipelineState
+    )
+    {
+        return SLANG_OK;
+    }
+
+    virtual gfx::Result createMeshPipelineState(
+        gfx::IDevice* device,
+        slang::IComponentType* program,
+        void* pipelineDesc,
+        void** outPipelineState
+    )
+    {
+        assert(!"Mesh pipelines are not supported.");
+        return SLANG_OK;
+    }
+
+    // This method will be called by the gfx layer right before creating a ray tracing state object.
+    virtual gfx::Result beforeCreateRayTracingState(gfx::IDevice* device, slang::IComponentType* program)
+    {
+        return SLANG_OK;
+    }
+
+    // This method will be called by the gfx layer right after creating a ray tracing state object.
+    virtual gfx::Result afterCreateRayTracingState(gfx::IDevice* device, slang::IComponentType* program)
+    {
+        return SLANG_OK;
+    }
+private:
+    CpuTimer m_timer;
+};
+
 class Device  : public Object{
 public:
     enum Type
@@ -37,69 +159,8 @@ public:
         D3D12,
         Vulkan,
     };
-
-    Device()
-    {
-        slang::createGlobalSession(m_slangGlobalSession.writeRef());
-        m_pProgramManager = std::make_unique<ProgramManager>(this);
-
-        gfx::IDevice::Desc gfxDesc = {};
-        gfxDesc.deviceType = gfx::DeviceType::Vulkan;
-        gfxDesc.slang.slangGlobalSession = m_slangGlobalSession;
-        gfxDesc.shaderCache.maxEntryCount = 1000;
-        gfxDesc.shaderCache.shaderCachePath = nullptr;
-
-        std::vector<void*> extendedDescs;
-        // Add extended desc for root parameter attribute.
-        gfx::D3D12DeviceExtendedDesc extDesc = {};
-        extDesc.rootParameterShaderAttributeName = "root";
-        extendedDescs.push_back(&extDesc);
-
-        gfxDesc.extendedDescCount = extendedDescs.size();
-        gfxDesc.extendedDescs = extendedDescs.data();
-
-        gfx::AdapterList adapters = gfx::gfxGetAdapters(gfxDesc.deviceType);
-        if (adapters.getCount() == 0)
-        {
-            assert(!"No GPU found");
-        }
-
-        // Try to create device on specific GPU.
-        gfxDesc.adapterLUID = &adapters.getAdapters()[0].luid;
-        if (SLANG_FAILED(gfx::gfxCreateDevice(&gfxDesc, m_gfxDevice.writeRef())))
-        {
-            printf("Failed to create device on GPU 0 (%s).", adapters.getAdapters()[0].name);
-        }
-
-        if (SLANG_FAILED(gfx::gfxSetDebugCallback(&gGFXDebugCallBack)))
-        {
-            printf("Failed to setup debug callback\n");
-        }
-        else
-        {
-            gfx::gfxEnableDebugLayer();
-        }
-
-        // Otherwise try create device on any available GPU.
-        if (!m_gfxDevice)
-        {
-            gfxDesc.adapterLUID = nullptr;
-            if (SLANG_FAILED(gfx::gfxCreateDevice(&gfxDesc, m_gfxDevice.writeRef())))
-                assert(!"Failed to create device");
-        }
-
-        gfx::ITransientResourceHeap::Desc transientHeapDesc = {};
-        transientHeapDesc.flags = gfx::ITransientResourceHeap::Flags::AllowResizing;
-        transientHeapDesc.constantBufferSize = 16 * 1024 * 1024;
-        transientHeapDesc.samplerDescriptorCount = 2048;
-        transientHeapDesc.uavDescriptorCount = 1000000;
-        transientHeapDesc.srvDescriptorCount = 1000000;
-        transientHeapDesc.constantBufferDescriptorCount = 1000000;
-        transientHeapDesc.accelerationStructureDescriptorCount = 1000000;
-        if (SLANG_FAILED(m_gfxDevice->createTransientResourceHeap(transientHeapDesc, m_transientResourceHeaps.writeRef()))) {
-            assert(!"Fail to create transient source heaps");
-        }
-    }
+    Device();
+    ~Device();
 
     gfx::ITransientResourceHeap* getCurrentTransientResourceHeap()
     {
@@ -116,10 +177,12 @@ public:
     gfx::IDevice* getGfxDevice() const { return m_gfxDevice; }
     Type getType() const { return m_type; }
 
+    double getPipelineCreationTime() {return mpAPIDispatcher->getPipelineCreationTime();}
 private:
     Slang::ComPtr<slang::IGlobalSession> m_slangGlobalSession;
     Slang::ComPtr<gfx::IDevice> m_gfxDevice;
     Slang::ComPtr<gfx::ITransientResourceHeap> m_transientResourceHeaps;
     Type m_type {Vulkan};
     std::unique_ptr<ProgramManager> m_pProgramManager;
+    std::unique_ptr<PipelineCreationAPIDispatcher> mpAPIDispatcher;
 };

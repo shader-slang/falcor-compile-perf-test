@@ -8,6 +8,7 @@ target_sources(falcor_perftest PRIVATE
     ProgramManager.cpp
     ProgramReflection.cpp
     ProgramVersion.cpp
+    DeviceWrapper.cpp
 )
 
 target_copy_shaders(falcor_perftest ./shaders .)

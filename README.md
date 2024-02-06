@@ -20,5 +20,5 @@ An existing build tree can be compiled using `cmake --build build/<preset name>`
 ## Run perftest
 ```
 cd build/<preset name>/bin/Debug
-./falcor_perftest
+__GL_SHADER_DISK_CACHE=0 ./falcor_perftest
 ```
