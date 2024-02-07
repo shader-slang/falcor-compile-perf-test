@@ -1,0 +1,21 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: configure
+      run: cmake --preset linux-gcc
+    - name: make
+      run: cmake --build build/linux-gcc
+    - name: run test
+      run: _GL_SHADER_DISK_CACHE=0 ./build/linux-gcc/bin/Debug/falcor_perftest
