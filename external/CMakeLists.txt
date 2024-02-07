@@ -5,7 +5,6 @@
 # external_includes
 add_library(external_includes INTERFACE)
 target_include_directories(external_includes INTERFACE include)
-
 # -----------------------------------------------------------------------------
 # Dependencies in packman
 # -----------------------------------------------------------------------------
@@ -50,3 +49,6 @@ elseif(FALCOR_LINUX)
         IMPORTED_LOCATION ${SLANG_DIR}/bin/linux-x64/${FALCOR_SLANG_CONFIG}/libgfx.so
     )
 endif()
+
+set(VULKAN_DIR ${PACKMAN_DIR}/vulkansdk)
+target_include_directories(external_includes INTERFACE ${VULKAN_DIR}/include)
