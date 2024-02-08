@@ -32,24 +32,6 @@
 
 struct SDFGridHitData
 {
-#ifdef FALCOR_INTERNAL
-#if SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_NDSDF
-    uint2 locationCode;                 ///< Contains excluded voxel unit component, grid level, and voxel coordinates.
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SVS
-    uint primitiveID;                   ///< Contains excluded voxel unit component and voxel primitive ID.
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SBS
-#if SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS + SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS <= 30
-    uint packedVoxelCoords;             ///< Contains excluded voxel unit component, brick local voxel coordinates, and virtual brick coords.
-#else
-    uint packedVirtualBrickCoords;      ///< Virtual brick coords.
-    uint packedBrickLocalVoxelCoords;   ///< Contains excluded voxel unit component and brick local voxel coordinates.
-#endif
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SVO
-    uint svoIndex;                      ///< Contains SVO index (similar to primitive ID).
-#endif
-
-    uint packedVoxelUnitCoords;         ///< Contains the two included voxel unit coordinate components as 16-bit unorms.
-#else // FALCOR_INTERNAL
 #if SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_NDSDF
     uint lod;
 #elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SVS || SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SBS
@@ -57,7 +39,5 @@ struct SDFGridHitData
 #elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SVO
     uint svoIndex;
 #endif
-
     float hitT;
-#endif // FALCOR_INTERNAL
 };

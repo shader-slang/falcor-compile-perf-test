@@ -163,25 +163,11 @@ ShadingData loadShadingData(const HitInfo hit, const float3 rayOrigin, const flo
         materialID = gScene.getMaterialID(curveHit.instanceID);
     }
 #endif
-#ifdef FALCOR_INTERNAL
-#if SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_CURVE_OTS)
-    if (hit.getType() == HitType::CurveOTS)
-    {
-        const CurveOTSHit curveOTSHit = hit.getCurveOTSHit();
-        v = gScene.getVertexData(curveOTSHit, rayOrigin);
-        materialID = gScene.getMaterialID(curveOTSHit.instanceID);
-    }
-#endif
-#endif // FALCOR_INTERNAL
 #if SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_SDF_GRID)
     if (hit.getType() == HitType::SDFGrid)
     {
         const SDFGridHit sdfGridHit = hit.getSDFGridHit();
-#ifdef FALCOR_INTERNAL
-        v = gScene.getVertexDataFromSDFGrid(sdfGridHit);
-#else
         v = gScene.getVertexDataFromSDFGrid(sdfGridHit, rayOrigin, rayDir);
-#endif
         materialID = gScene.getMaterialID(sdfGridHit.instanceID);
     }
 #endif

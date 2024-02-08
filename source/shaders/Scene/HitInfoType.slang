@@ -40,9 +40,6 @@ enum class HitType : uint32_t
 
     DisplacedTriangle   = 3,    ///< Displaced triangle hit.
     Curve               = 4,    ///< Curve hit.
-#ifdef FALCOR_INTERNAL
-    CurveOTS            = 5,    ///< Curve tessellated into orthogonal triangle strip hit.
-#endif // FALCOR_INTERNAL
     SDFGrid             = 6,    ///< SDF grid hit.
 
     //

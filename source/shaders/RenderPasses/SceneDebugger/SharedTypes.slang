@@ -90,19 +90,8 @@ enum class SceneDebuggerBSDFProperty : uint32_t
     SpecularTransmissionAlbedo,
     SpecularReflectance,
     IsTransmissive,
-#ifdef FALCOR_INTERNAL
-    LayerNormal,
-    LayerTangent,
-    LayerBitangent,
-    LayerAlbedo,
-    LayerWeight,
-    LayerRoughness,
-    LayerScratch,
-    LayerIndex,
-#endif
 };
 
-#ifndef FALCOR_INTERNAL
 FALCOR_ENUM_INFO(
     SceneDebuggerBSDFProperty,
     {
@@ -117,31 +106,6 @@ FALCOR_ENUM_INFO(
         { SceneDebuggerBSDFProperty::IsTransmissive, "IsTransmissive" },
     }
 );
-#else
-FALCOR_ENUM_INFO(
-    SceneDebuggerBSDFProperty,
-    {
-        { SceneDebuggerBSDFProperty::Emission, "Emission" },
-        { SceneDebuggerBSDFProperty::Roughness, "Roughness" },
-        { SceneDebuggerBSDFProperty::GuideNormal, "GuideNormal" },
-        { SceneDebuggerBSDFProperty::DiffuseReflectionAlbedo, "DiffuseReflectionAlbedo" },
-        { SceneDebuggerBSDFProperty::DiffuseTransmissionAlbedo, "DiffuseTransmissionAlbedo" },
-        { SceneDebuggerBSDFProperty::SpecularReflectionAlbedo, "SpecularReflectionAlbedo" },
-        { SceneDebuggerBSDFProperty::SpecularTransmissionAlbedo, "SpecularTransmissionAlbedo" },
-        { SceneDebuggerBSDFProperty::SpecularReflectance, "SpecularReflectance" },
-        { SceneDebuggerBSDFProperty::IsTransmissive, "IsTransmissive" },
-
-        { SceneDebuggerBSDFProperty::LayerNormal, "LayerNormal" },
-        { SceneDebuggerBSDFProperty::LayerTangent, "LayerTangent" },
-        { SceneDebuggerBSDFProperty::LayerBitangent, "LayerBitangent" },
-        { SceneDebuggerBSDFProperty::LayerAlbedo, "LayerAlbedo" },
-        { SceneDebuggerBSDFProperty::LayerWeight, "LayerWeight" },
-        { SceneDebuggerBSDFProperty::LayerRoughness, "LayerRoughness" },
-        { SceneDebuggerBSDFProperty::LayerScratch, "LayerScratch" },
-        { SceneDebuggerBSDFProperty::LayerIndex, "LayerIndex" },
-    }
-);
-#endif
 FALCOR_ENUM_REGISTER(SceneDebuggerBSDFProperty);
 
 struct SceneDebuggerParams

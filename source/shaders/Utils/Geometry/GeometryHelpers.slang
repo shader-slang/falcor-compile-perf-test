@@ -53,22 +53,6 @@ import Utils.Math.MathHelpers;
 [PreferRecompute]
 float3 computeRayOrigin(float3 pos, float3 normal)
 {
-#ifdef FALCOR_INTERNAL
-    // From Carsten Waechter:
-    // we move the cam to (0,0,0) and move the scene to compensate.
-    //   -- otherwise the "origin" test does not really work
-    // Also regarding computing the initial hitpoint, this is what we use at the moment(seems like the best variant) :
-    // hitpoint.x = __fmaf_rn(u, (obj_v[1].x - obj_v[0].x), __fmaf_rn(v, (obj_v[2].x - obj_v[0].x), obj_v[0].x));
-    // hitpoint.y = __fmaf_rn(u, (obj_v[1].y - obj_v[0].y), __fmaf_rn(v, (obj_v[2].y - obj_v[0].y), obj_v[0].y));
-    // hitpoint.z = __fmaf_rn(u, (obj_v[1].z - obj_v[0].z), __fmaf_rn(v, (obj_v[2].z - obj_v[0].z), obj_v[0].z));
-    // and: As mentioned above, due to RTX/TTU precision quirks (that we're still trying to fully understand) we also tweaked the constants
-    // after the gem: 1.0/16.0 for near zero handling and the offset scale is 3x higher for the non-near zero handling. That's why we're
-    // currently revisiting all of that code. It still works pretty good on RTX/TTU, but we got much more special cases over time from our
-    // ISVs to "fix". So the plan is to use as much as possible from PBRT, BUT the problem is that the error handling in there NEEDS to use
-    // a custom triangle intersection test, which is clearly not possible with the TTU, and as mentioned yesterday, arch is also not happy
-    // to sacrifice chip space for more math/triangle.  :confused:
-#endif // FALCOR_INTERNAL
-
     const float origin = 1.f / 16.f;
     const float fScale = 3.f / 65536.f;
     const float iScale = 3 * 256.f;

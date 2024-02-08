@@ -132,22 +132,6 @@ void adjustShadingNormal(const ShadingData sd, inout ShadingFrame sf)
     float signN = dot(sf.N, Ng) >= 0.f ? 1.f : -1.f;
     float3 Ns = signN * sf.N;
 
-#ifdef FALCOR_INTERNAL
-    // Algorithm from Appendix A.3 of https://arxiv.org/abs/1705.01263
-    // The specular reflection of the view direction is computed.
-    // If the reflection vector lies under the horizon, the shading normal is adjusted.
-    // This ensures that the majority of the reflection lobe lies on the same side,
-    // but it does not guarantee that all directions are valid in the general case.
-
-    // Specular reflection in shading normal
-    float3 R = reflect(-sd.V, Ns);
-    float a = dot(Ng, R);
-    if (a < 0) // Perturb normal
-    {
-        float b = max(0.001, dot(Ns, Ng));
-        sf = ShadingFrame(signN * (sd.V + normalize(R - Ns * a / b)), sd.tangentW);
-    }
-#else
     // Blend the shading normal towards the geometric normal at grazing angles.
     // This is to avoid the view vector from becoming back-facing.
     const float kCosThetaThreshold = 0.1f;
@@ -157,7 +141,6 @@ void adjustShadingNormal(const ShadingData sd, inout ShadingFrame sf)
         float t = saturate(cosTheta * (1.f / kCosThetaThreshold));
         sf = ShadingFrame(signN * lerp(Ng, Ns, t), sd.tangentW);
     }
-#endif
 }
 
 /** Hemisphere check for reflection.

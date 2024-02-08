@@ -137,13 +137,4 @@ struct HairMaterialInstance : MaterialInstanceBase, IMaterialInstance
         // TODO: Update this when lobes are classified as diffuse or specular according to roughness.
         return (uint)LobeType::DiffuseReflection | (uint)LobeType::DiffuseTransmission;
     }
-
-#ifdef FALCOR_INTERNAL
-    ExtraBSDFProperties getExtraBSDFProperties(const ShadingData sd, const float3 wo)
-    {
-        ExtraBSDFProperties result;
-        result.bsdfCount = 0;
-        return result;
-    }
-#endif
 };

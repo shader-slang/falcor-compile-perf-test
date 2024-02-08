@@ -38,12 +38,6 @@ cbuffer Visual2DCB
 
 cbuffer VoxelNormalsCB
 {
-#ifdef FALCOR_INTERNAL
-    int iShowStandardNormals;
-    int iShowInterpolatedNormals;
-    int iShowJacobiNormals;
-    int iShowDiffNormals;
-#endif
     int iShowNormalField;
     int iShowBoxes;
     int iShowBoxAroundPoint;
@@ -152,192 +146,6 @@ void computeStandardPositionsAndNormals(float2 position, out float2 normal, out 
     }
 }
 
-#ifdef FALCOR_INTERNAL
-float2 computeInterpolatedNormal(float2 dualCoord, int2 voxelMinIndex)
-{
-    float2 coord;
-    float2 weights = float2(1.0f);
-    float2 normal = float2(0.0f);
-
-    coord.y = dualCoord.y + 0.5;
-    weights.y = 1.0f - dualCoord.y;
-
-    for (int y = voxelMinIndex.y; y <= voxelMinIndex.y + 1; y++)
-    {
-        coord.x = dualCoord.x + 0.5;
-        weights.x = 1.0f - dualCoord.x;
-
-        for (int x = voxelMinIndex.x; x <= voxelMinIndex.x + 1; x++)
-        {
-            if (x >= 0 && x <= numVoxels.x + 1 && y >= 0 && y <= numVoxels.y + 1)
-            {
-                float2 N = normalVector(coord, sdf[x][y], sdf[x + 1][y], sdf[x][y + 1], sdf[x + 1][y + 1]);
-                float w;
-                w = weights.x * weights.y;
-                normal += w * N;
-            }
-
-            coord.x -= 1.0;
-            weights.x = dualCoord.x;
-        }
-        coord.y -= 1.0;
-        weights.y = dualCoord.y;
-    }
-    return normalize(normal);
-}
-
-void computeInterpolatedNormals(float2 position, out float2 normal, out float2 warpedNormal)
-{
-    float2 barys;
-    bool inside = false;
-    normal = float2(0, 0);
-    warpedNormal = float2(0, 0);
-
-    if (position.x < start.x || position.y < start.x || position.x > start.x + side * numVoxels.x ||
-        position.y > start.y + side * numVoxels.y)
-        return;
-
-    int2 voxelIndex;
-    float2 dualCoords = convertToDualVoxelSpaceIndex(position, voxelIndex);
-    normal = computeInterpolatedNormal(dualCoords, voxelIndex);
-
-    int x = int((position.x - P[0][0].x) / side);
-    int y = int((position.y - P[0][0].y) / side);
-
-    if (isInsideTri(position, P[x][y], P[x + 1][y], P[x][y + 1], barys))
-    {
-        inside = true;
-        warpedNormal = normal.x * (X[x + 1][y] - X[x][y]) + normal.y * (X[x][y + 1] - X[x][y]);
-    }
-    else if (isInsideTri(position, P[x + 1][y + 1], P[x][y + 1], P[x + 1][y], barys))
-    {
-        inside = true;
-        warpedNormal = normal.x * (X[x + 1][y + 1] - X[x][y + 1]) + normal.y * (X[x + 1][y + 1] - X[x + 1][y]);
-    }
-}
-
-float2 applyJacobianToNormal(float2 position, float2 normal, inout float4 colorTmp)
-{
-    int2 voxelIndex;
-    float2 dualCoords = convertToDualVoxelSpaceIndex(position, voxelIndex);
-
-    int ix0 = clamp(voxelIndex.x, 0, numVoxels.x);
-    int ix1 = clamp(voxelIndex.x + 1, 0, numVoxels.x);
-    int ix2 = clamp(voxelIndex.x + 2, 0, numVoxels.x);
-
-    int iy0 = clamp(voxelIndex.y, 0, numVoxels.y);
-    int iy1 = clamp(voxelIndex.y + 1, 0, numVoxels.y);
-    int iy2 = clamp(voxelIndex.y + 2, 0, numVoxels.y);
-    float2 p00 = P[ix0][iy0];
-    float2 p10 = P[ix1][iy0];
-    float2 p20 = P[ix2][iy0];
-    float2 p01 = P[ix0][iy1];
-    float2 p11 = P[ix1][iy1];
-    float2 p21 = P[ix2][iy1];
-    float2 p02 = P[ix0][iy2];
-    float2 p12 = P[ix1][iy2];
-    float2 p22 = P[ix2][iy2];
-
-    float2 dx0, dx1, dx2;
-    float2 dy0, dy1, dy2;
-    if (voxelIndex.x == -1)
-    {
-        dx0 = 2.0 * (p20 - p10);
-        dx1 = 2.0 * (p21 - p11);
-        dx2 = 2.0 * (p22 - p12);
-    }
-    else if (voxelIndex.x == numVoxels.x - 1)
-    {
-        dx0 = 2.0 * (p10 - p00);
-        dx1 = 2.0 * (p11 - p01);
-        dx2 = 2.0 * (p12 - p02);
-    }
-    else
-    {
-        dx0 = p20 - p00;
-        dx2 = p22 - p02;
-        dx1 = p21 - p01;
-    }
-    if (voxelIndex.y == -1)
-    {
-        dy0 = 2.0 * (p02 - p01);
-        dy1 = 2.0 * (p12 - p11);
-        dy2 = 2.0 * (p22 - p21);
-    }
-    else if (voxelIndex.y == numVoxels.y - 1)
-    {
-        dy0 = 2.0 * (p01 - p00);
-        dy1 = 2.0 * (p11 - p10);
-        dy2 = 2.0 * (p21 - p20);
-    }
-    else
-    {
-        dy0 = p02 - p00;
-        dy2 = p22 - p20;
-        dy1 = p12 - p10;
-    }
-    float2 dgdx = (1 - dualCoords.y) * dx0 + dualCoords.y * dx2 + dx1;
-    float2 dgdy = (1 - dualCoords.x) * dy0 + dualCoords.x * dy2 + dy1;
-
-    float2 warpedNormal;
-    warpedNormal.x = dot(normal, float2(dgdx.x, dgdy.x));
-    warpedNormal.y = dot(normal, float2(dgdx.y, dgdy.y));
-    return warpedNormal;
-}
-
-float bilerpSDF(float2 p)
-{
-    int2 indexS = int2(floor(p)); // First index of bilinear interpolation.
-    int2 indexE = indexS + 1;
-    indexS = clamp(indexS, int2(0), numVoxels);
-    indexE = clamp(indexE, int2(0), numVoxels);
-
-    float2 barys = p - float2(indexS);
-    float sdfValue;
-    evalBilinear(barys, sdf[indexS.x][indexS.y], sdf[indexE.x][indexS.y], sdf[indexS.x][indexE.y], sdf[indexE.x][indexE.y], sdfValue);
-
-    return sdfValue;
-}
-
-float2 bilerpP(float2 p)
-{
-    int2 indexS = int2(floor(p)); // First index of bilinear interpolation.
-    int2 indexE = indexS + 1;
-    indexS = clamp(indexS, int2(0), numVoxels);
-    indexE = clamp(indexE, int2(0), numVoxels);
-
-    float2 barys = p - float2(indexS);
-    float2 point;
-    evalBilinear(barys, P[indexS.x][indexS.y], P[indexE.x][indexS.y], P[indexS.x][indexE.y], P[indexE.x][indexE.y], point);
-
-    return point;
-}
-
-void computeDiffNormals(float2 p, out float2 normal)
-{
-    p -= start;
-    p /= side;
-
-    // Let p be hitpoint in grid space.
-    float2 d = float2(-0.5, 0.5);
-
-    float n00 = bilerpSDF(p + d.xx);
-    float n10 = bilerpSDF(p + d.yx);
-    float n01 = bilerpSDF(p + d.xy);
-    float n11 = bilerpSDF(p + d.yy);
-
-    float2 p00 = bilerpP(p + d.xx);
-    float2 p10 = bilerpP(p + d.yx);
-    float2 p01 = bilerpP(p + d.xy);
-    float2 p11 = bilerpP(p + d.yy);
-
-    float2 px = (p10 + p11) - (p00 + p01);
-    float2 py = (p01 + p11) - (p00 + p10);
-
-    normal = normalize(float2((n10 + n11) - (n00 + n01), (n01 + n11) - (n00 + n10)));
-}
-#endif
-
 void drawBox(
     float2 coords,
     int voxelX,
@@ -377,24 +185,7 @@ void drawBox(
     }
 
     float2 normal = float2(0, 0), wp, warpedNormal = float2(0, 0);
-#ifndef FALCOR_INTERNAL
     computeStandardPositionsAndNormals(point, normal, wp, warpedNormal);
-#else
-    if (iShowStandardNormals != 0)
-        computeStandardPositionsAndNormals(point, normal, wp, warpedNormal);
-    if (iShowInterpolatedNormals != 0)
-        computeInterpolatedNormals(point, normal, warpedNormal);
-    if (iShowJacobiNormals != 0)
-    {
-        computeInterpolatedNormals(point, normal, warpedNormal);
-        warpedNormal = applyJacobianToNormal(point, normal, color);
-    }
-    if (iShowDiffNormals != 0)
-    {
-        computeDiffNormals(point, normal);
-        warpedNormal = applyJacobianToNormal(point, normal, color);
-    }
-#endif
     normal = (normalize(normal) + 1.0) * 0.5;
     warpedNormal = (normalize(warpedNormal) + 1.0) * 0.5;
 
@@ -500,7 +291,6 @@ float4 main(float2 texC: TEXCOORD) : SV_TARGET
     }
 
     // Compute normals at the mouse position.
-#ifndef FALCOR_INTERNAL
     float2 warpedPosition, warpedStandardNormal, standardNormal;
     computeStandardPositionsAndNormals(mouseCoords, standardNormal, warpedPosition, warpedStandardNormal);
     color = sdfDraw(
@@ -514,80 +304,6 @@ float4 main(float2 texC: TEXCOORD) : SV_TARGET
             color,
             blendRadius
         );
-#else
-    float2 warpedPosition, warpedStandardNormal, standardNormal, interpolatedNormal, warpedInterpolatedNormal, warpedJacobianNormal,
-        diffNormal, warpedDiffNormal;
-    computeStandardPositionsAndNormals(mouseCoords, standardNormal, warpedPosition, warpedStandardNormal);
-    computeInterpolatedNormals(mouseCoords, interpolatedNormal, warpedInterpolatedNormal);
-    warpedJacobianNormal = applyJacobianToNormal(mouseCoords, interpolatedNormal, color);
-    computeDiffNormals(mouseCoords, diffNormal);
-    warpedDiffNormal = applyJacobianToNormal(mouseCoords, diffNormal, color);
-
-    if (iShowStandardNormals != 0)
-    {
-        color = sdfDraw(
-            SDF2DVector(mouseCoords, mouseCoords + standardNormal * side, lineSize * 2.0, side * 0.075), coords, red, color, blendRadius
-        );
-        if (warpedStandardNormal.x != 0.0 && warpedStandardNormal.y != 0.0)
-            color = sdfDraw(
-                SDF2DVector(warpedPosition, warpedPosition + normalize(warpedStandardNormal) * side, lineSize * 2.0, side * 0.075),
-                coords,
-                red,
-                color,
-                blendRadius
-            );
-    }
-    if (iShowInterpolatedNormals != 0)
-    {
-        color = sdfDraw(
-            SDF2DVector(mouseCoords, mouseCoords + interpolatedNormal * side, lineSize * 2.0, side * 0.075),
-            coords,
-            green,
-            color,
-            blendRadius
-        );
-        if (warpedInterpolatedNormal.x != 0.0 && warpedInterpolatedNormal.y != 0.0)
-            color = sdfDraw(
-                SDF2DVector(warpedPosition, warpedPosition + normalize(warpedInterpolatedNormal) * side, lineSize * 2.0, side * 0.075),
-                coords,
-                green,
-                color,
-                blendRadius
-            );
-    }
-    if (iShowJacobiNormals != 0)
-    {
-        color = sdfDraw(
-            SDF2DVector(mouseCoords, mouseCoords + interpolatedNormal * side, lineSize * 2.0, side * 0.075),
-            coords,
-            blue,
-            color,
-            blendRadius
-        );
-        if (warpedJacobianNormal.x != 0.0 && warpedJacobianNormal.y != 0.0)
-            color = sdfDraw(
-                SDF2DVector(warpedPosition, warpedPosition + normalize(warpedJacobianNormal) * side, lineSize * 2.0, side * 0.075),
-                coords,
-                blue,
-                color,
-                blendRadius
-            );
-    }
-    if (iShowDiffNormals != 0)
-    {
-        color = sdfDraw(
-            SDF2DVector(mouseCoords, mouseCoords + diffNormal * side, lineSize * 2.0, side * 0.075), coords, cyan, color, blendRadius
-        );
-        if (warpedDiffNormal.x != 0.0 && warpedDiffNormal.y != 0.0)
-            color = sdfDraw(
-                SDF2DVector(warpedPosition, warpedPosition + normalize(warpedDiffNormal) * side, lineSize * 2.0, side * 0.075),
-                coords,
-                cyan,
-                color,
-                blendRadius
-            );
-    }
-#endif
     if (iShowBorderLines != 0)
     {
         color = sdfDraw(

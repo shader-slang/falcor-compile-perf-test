@@ -1,18 +1,10 @@
 #include "path-tracer.h"
 
-#define FALCOR_INTERNAL 1
-
 enum class SDFGridIntersectionMethod : uint32_t
 {
     None = 0,
     GridSphereTracing = 1,
     VoxelSphereTracing = 2,
-#ifdef FALCOR_INTERNAL
-    VoxelOptimizedSphereTracing = 3,
-    VoxelCubicAnalytic = 4,
-    VoxelCubicNumericMarmitt = 5,
-    VoxelCubicNumericNewtonRaphson = 6,
-#endif
 };
 
 enum class SDFGridGradientEvaluationMethod : uint32_t
@@ -20,10 +12,6 @@ enum class SDFGridGradientEvaluationMethod : uint32_t
     None = 0,
     NumericDiscontinuous = 1,
     NumericContinuous = 2,
-#ifdef FALCOR_INTERNAL
-    AnalyticDiscontinuous = 3,
-    InterpolatedContinuous = 4,
-#endif
 };
 
 class SDFGrid
@@ -56,7 +44,6 @@ DefineList PathTracer::StaticParams::getDefines(const PathTracer& owner) const
     defines.add("USE_MIS", useMIS ? "1" : "0");
     defines.add("USE_RUSSIAN_ROULETTE", useRussianRoulette ? "1" : "0");
     defines.add("USE_SCREEN_SPACE_RESTIR", useScreenSpaceReSTIR ? "1" : "0");
-    defines.add("USE_NEURAL_RADIANCE_CACHE", useNRC ? "1" : "0");
     defines.add("USE_ALPHA_TEST", useAlphaTest ? "1" : "0");
     defines.add("USE_LIGHTS_IN_DIELECTRIC_VOLUMES", useLightsInDielectricVolumes ? "1" : "0");
     defines.add("LIMIT_TRANSMISSION", limitTransmission ? "1" : "0");
@@ -74,22 +61,15 @@ DefineList PathTracer::StaticParams::getDefines(const PathTracer& owner) const
     defines.add("USE_NRD_DEMODULATION", useNRDDemodulation ? "1" : "0");
 
     // Scheduling configuration.
-    defines.add("USE_SPECULAR_QUEUE", useSpecularQueue ? "1" : "0");
-    defines.add("PATH_REGENERATION_COUNT_MAIN", std::to_string(usePathRegeneration ? pathRegenerationCountMain : 32u));
-    defines.add("PATH_REGENERATION_COUNT_SPECULAR", std::to_string(usePathRegeneration ? pathRegenerationCountSpecular : 32u));
-    defines.add("PATH_REGENERATION_COUNT_DELTA_REFLECTION", std::to_string(usePathRegeneration ? pathRegenerationCountDeltaReflection : 32u));
-    defines.add("PATH_REGENERATION_COUNT_DELTA_TRANSMISSION", std::to_string(usePathRegeneration ? pathRegenerationCountDeltaTransmission : 32u));
     defines.add("USE_SER", useSER ? "1" : "0");
-    defines.add("USE_REORDER_TRACE_RAY_FAST_PATH", useReorderTraceRayFastPath ? "1" : "0");
-    defines.add("USE_TRACE_RAY_VISIBILITY", useTraceRayVisibility ? "1" : "0");
 
     defines.add("USE_ENV_LIGHT", "1");
     defines.add("USE_ANALYTIC_LIGHTS", "0");
     defines.add("USE_EMISSIVE_LIGHTS", "1");
     defines.add("USE_GRID_VOLUMES", "0");
     defines.add("USE_CURVES", "0");
-    defines.add("USE_SDF_GRIDS", "0");
     defines.add("USE_HAIR_MATERIAL", "1");
+    defines.add("USE_RTXDI", "0");
 
     defines.add("_ACTUAL_MAX_TRIANGLES_PER_NODE", "10");
     defines.add("_DISABLE_NODE_FLUX", "0");
@@ -106,10 +86,7 @@ DefineList PathTracer::StaticParams::getDefines(const PathTracer& owner) const
     defines.add("MATERIAL_SYSTEM_UDIM_INDIRECTION_ENABLED", "0");
     defines.add("MATERIAL_SYSTEM_HAS_SPEC_GLOSS_MATERIALS", "0");
     defines.add("FALCOR_MATERIAL_INSTANCE_SIZE", std::to_string(128));
-    defines.add("FALCOR_INTERNAL", std::to_string(FALCOR_INTERNAL));
-    defines.add("FALCOR_ENABLE_TIN", std::to_string(0));
     defines.add("FALCOR_NVAPI_AVAILABLE", std::to_string(0));
-    defines.add("FALCOR_ENABLE_NV_COOP_VECTOR", std::to_string(0));
 
     defines.add("SAMPLE_GENERATOR_TYPE", std::to_string(0));
     defines.add("SAMPLES_PER_PIXEL", std::to_string(1));
@@ -132,21 +109,9 @@ DefineList PathTracer::StaticParams::getDefines(const PathTracer& owner) const
     defines.add("SCENE_SDF_NO_VOXEL_SOLVER", std::to_string((uint32_t)SDFGridIntersectionMethod::GridSphereTracing));
     defines.add("SCENE_SDF_VOXEL_SPHERE_TRACING", std::to_string((uint32_t)SDFGridIntersectionMethod::VoxelSphereTracing));
 
-#ifdef FALCOR_INTERNAL
-    defines.add("SCENE_SDF_VOXEL_OPTIMIZED_SPHERE_TRACING", std::to_string((uint32_t)SDFGridIntersectionMethod::VoxelOptimizedSphereTracing));
-    defines.add("SCENE_SDF_VOXEL_CUBIC_SOLVER_ANALYTIC", std::to_string((uint32_t)SDFGridIntersectionMethod::VoxelCubicAnalytic));
-    defines.add("SCENE_SDF_VOXEL_CUBIC_SOLVER_NUMERIC_MARMITT", std::to_string((uint32_t)SDFGridIntersectionMethod::VoxelCubicNumericMarmitt));
-    defines.add("SCENE_SDF_VOXEL_CUBIC_SOLVER_NUMERIC_NEWTON_RAPHSON", std::to_string((uint32_t)SDFGridIntersectionMethod::VoxelCubicNumericNewtonRaphson));
-#endif
-
     defines.add("SCENE_SDF_NO_GRADIENT_EVALUATION_METHOD", std::to_string((uint32_t)SDFGridGradientEvaluationMethod::None));
     defines.add("SCENE_SDF_GRADIENT_NUMERIC_DISCONTINUOUS", std::to_string((uint32_t)SDFGridGradientEvaluationMethod::NumericDiscontinuous));
     defines.add("SCENE_SDF_GRADIENT_NUMERIC_CONTINUOUS", std::to_string((uint32_t)SDFGridGradientEvaluationMethod::NumericContinuous));
-
-#ifdef FALCOR_INTERNAL
-    defines.add("SCENE_SDF_GRADIENT_ANALYTIC_DISCONTINUOUS", std::to_string((uint32_t)SDFGridGradientEvaluationMethod::AnalyticDiscontinuous));
-    defines.add("SCENE_SDF_GRADIENT_INTERPOLATED_CONTINUOUS", std::to_string((uint32_t)SDFGridGradientEvaluationMethod::InterpolatedContinuous));
-#endif
 
         // Setup dynamic defines based on current configuration.
     defines.add("SCENE_SDF_GRID_COUNT", std::to_string(0));
@@ -167,13 +132,6 @@ DefineList PathTracer::StaticParams::getDefines(const PathTracer& owner) const
     defines.add("GRID_VOLUME_SAMPLER_USE_BRICKEDGRID", std::to_string((uint32_t)1));
     defines.add("GRID_VOLUME_SAMPLER_TRANSMITTANCE_ESTIMATOR", std::to_string((uint32_t)2));
     defines.add("GRID_VOLUME_SAMPLER_DISTANCE_SAMPLER", std::to_string((uint32_t)1));
-#ifdef FALCOR_INTERNAL
-    defines.add("GRID_VOLUME_SAMPLER_RAY_MARCHING_ROULETTE_THRESHOLD", std::to_string(0.03f));
-    defines.add("GRID_VOLUME_SAMPLER_BIASED_RAY_MARCHING_LOOKUP_MULTIPLIER", std::to_string(0.5f));
-    defines.add("GRID_VOLUME_SAMPLER_BIASED_RAY_MARCHING_LOCAL_CDF_STEP_SIZE", std::to_string(1.0f));
-    defines.add("GRID_VOLUME_SAMPLER_UNBIASED_RAY_MARCHING_LOOKUP_MULTIPLIER", std::to_string(1.0f));
-    defines.add("GRID_VOLUME_SAMPLER_UNBIASED_RAY_MARCHING_MAX_ORDER", std::to_string(12));
-#endif
 
     defines.add("HIT_INFO_DEFINES", "1");
     defines.add("HIT_INFO_USE_COMPRESSION", "0");
@@ -190,10 +148,6 @@ DefineList PathTracer::StaticParams::getDefines(const PathTracer& owner) const
     defines.add("OUTPUT_TIME", "0");
     defines.add("OUTPUT_DEBUG", "0");
     defines.add("ENABLE_STATS", "0");
-
-    // Stochastic texture filtering specialization
-    defines.add("USE_STOCHASTIC_BICUBIC_FILTERING", useStochasticBicubicFiltering ? "1" : "0");
-    defines.add("USE_SPATIO_TEMP_BLUE_NOISE", useSpatioTemporalBlueNoise ? "1" : "0");
 
     return defines;
 }

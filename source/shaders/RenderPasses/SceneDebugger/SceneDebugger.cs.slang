@@ -163,19 +163,6 @@ struct SceneDebugger
             v = gScene.getVertexDataFromCurve(curveHit);
             break;
         }
-#ifdef FALCOR_INTERNAL
-        case HitType::CurveOTS:
-        {
-            const CurveOTSHit curveOTSHit = hit.getCurveOTSHit();
-            instanceID = curveOTSHit.instanceID.index;
-            geometryID = gScene.getGeometryInstance(curveOTSHit.instanceID).geometryID;
-            materialID = gScene.getMaterialID(curveOTSHit.instanceID);
-
-            // Load vertex attributes.
-            v = gScene.getVertexData(curveOTSHit, orig);
-            break;
-        }
-#endif // FALCOR_INTERNAL
         case HitType::SDFGrid:
         {
             const SDFGridHit sdfGridHit = hit.getSDFGridHit();
@@ -184,11 +171,7 @@ struct SceneDebugger
             materialID = gScene.getMaterialID(sdfGridHit.instanceID);
 
             // Load vertex attributes.
-#ifdef FALCOR_INTERNAL
-            v = gScene.getVertexDataFromSDFGrid(sdfGridHit);
-#else
             v = gScene.getVertexDataFromSDFGrid(sdfGridHit, orig, dir);
-#endif
             break;
         }
         default:
@@ -317,31 +300,6 @@ struct SceneDebugger
             case SceneDebuggerBSDFProperty::IsTransmissive:
                 return bsdfProperties.isTransmissive ? float3(0, 1, 0) : float3(1, 0, 0);
             }
-#ifdef FALCOR_INTERNAL
-            let bsdfExtraProperties = mi.getExtraBSDFProperties(sd, -dir);
-            uint bsdfIndex = params.bsdfIndex;
-            if (bsdfIndex >= bsdfExtraProperties.bsdfCount)
-                return float3(z, z, 0);
-            switch ((SceneDebuggerBSDFProperty)params.bsdfProperty)
-            {
-            case SceneDebuggerBSDFProperty::LayerNormal:
-                return remapVector(bsdfExtraProperties.bsdfN[bsdfIndex]);
-            case SceneDebuggerBSDFProperty::LayerTangent:
-                return remapVector(bsdfExtraProperties.bsdfT[bsdfIndex]);
-            case SceneDebuggerBSDFProperty::LayerBitangent:
-                return remapVector(bsdfExtraProperties.bsdfB[bsdfIndex]);
-            case SceneDebuggerBSDFProperty::LayerAlbedo:
-                return bsdfExtraProperties.bsdfAlbedo[bsdfIndex];
-            case SceneDebuggerBSDFProperty::LayerWeight:
-                return bsdfExtraProperties.bsdfWeight[bsdfIndex];
-            case SceneDebuggerBSDFProperty::LayerRoughness:
-                return float3(bsdfExtraProperties.bsdfRoughness[bsdfIndex], 0.f);
-            case SceneDebuggerBSDFProperty::LayerScratch:
-                return bsdfExtraProperties.bsdfScratch[bsdfIndex];
-            case SceneDebuggerBSDFProperty::LayerIndex:
-                return pseudocolor((uint)bsdfExtraProperties.bsdfIndex[bsdfIndex]);
-            }
-#endif
         }
 
         default:

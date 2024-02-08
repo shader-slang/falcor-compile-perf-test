@@ -37,29 +37,13 @@ enum class TransmittanceEstimator
     DeltaTracking,
     RatioTracking,
     RatioTrackingLocalMajorant,  // BrickedGrid only.
-#ifdef FALCOR_INTERNAL
-    UnbiasedRayMarching,
-    BiasedRayMarching,
-    BiasedRayMarchingLocalMajorant
-#endif
 };
 
-#ifdef FALCOR_INTERNAL
-FALCOR_ENUM_INFO(TransmittanceEstimator, {
-    { TransmittanceEstimator::DeltaTracking, "DeltaTracking" },
-    { TransmittanceEstimator::RatioTracking, "RatioTracking" },
-    { TransmittanceEstimator::RatioTrackingLocalMajorant, "RatioTrackingLocalMajorant" },
-    { TransmittanceEstimator::UnbiasedRayMarching, "UnbiasedRayMarching" },
-    { TransmittanceEstimator::BiasedRayMarching, "BiasedRayMarching" },
-    { TransmittanceEstimator::BiasedRayMarchingLocalMajorant, "BiasedRayMarchingLocalMajorant" },
-});
-#else
 FALCOR_ENUM_INFO(TransmittanceEstimator, {
     { TransmittanceEstimator::DeltaTracking, "DeltaTracking" },
     { TransmittanceEstimator::RatioTracking, "RatioTracking" },
     { TransmittanceEstimator::RatioTrackingLocalMajorant, "RatioTrackingLocalMajorant" },
 });
-#endif
 FALCOR_ENUM_REGISTER(TransmittanceEstimator);
 
 enum class DistanceSampler

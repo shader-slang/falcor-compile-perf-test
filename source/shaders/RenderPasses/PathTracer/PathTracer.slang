@@ -438,9 +438,6 @@ struct PathTracer
     {
         const bool isTriangleHit = path.hit.getType() == HitType::Triangle;
         const bool isCurveHit = kUseCurves && (path.hit.getType() == HitType::Curve);
-#ifdef FALCOR_INTERNAL
-        const bool isCurveOTSHit = kUseCurves && (path.hit.getType() == HitType::CurveOTS);
-#endif // FALCOR_INTERNAL
         const bool isHairMaterial = kUseHairMaterial && (sd.mtl.getMaterialType() == MaterialType::Hair);
         // TODO: Decouple geometry from the material.
         const bool isCurvePolyTubeHit = isTriangleHit && isHairMaterial;
@@ -485,15 +482,6 @@ struct PathTracer
             {
                 // No need to offset the origin in this case.
             }
-#ifdef FALCOR_INTERNAL
-            else if (isCurveOTSHit)
-            {
-                // For curves tessellated into orthogonal triangle strips, we make sure that the origin is on the same side as a scatter ray direction
-                // so there is no self-intersection.
-                const float otsWidthScale = 1.11f;
-                path.origin = sd.posW - otsWidthScale * sd.faceN * sd.curveRadius;
-            }
-#endif // FALCOR_INTERNAL
             else if (isCurvePolyTubeHit)
             {
                 // For curves tessellated into poly-tubes, we make sure that the origin is on the same side as a scatter ray direction
@@ -842,9 +830,6 @@ struct PathTracer
         const HitType hitType = path.hit.getType();
         const bool isTriangleHit = hitType == HitType::Triangle;
         const bool isCurveHit = kUseCurves && (hitType == HitType::Curve);
-#ifdef FALCOR_INTERNAL
-        const bool isCurveOTSHit = kUseCurves && (hitType == HitType::CurveOTS);
-#endif // FALCOR_INTERNAL
 
         let lod = createTextureSampler(path, isPrimaryHit, isTriangleHit);
 
@@ -947,14 +932,6 @@ struct PathTracer
             // For curves, we set the new origin at the sphere center.
             path.origin = sd.posW - sd.frame.N * sd.curveRadius;
         }
-#ifdef FALCOR_INTERNAL
-        else if (isCurveOTSHit)
-        {
-            // For curves tessellated into orthogonal triangle strips, we offset the new origin away from the curve center.
-            const float otsWidthScale = 1.11f;
-            path.origin = sd.posW + otsWidthScale * sd.faceN * sd.curveRadius;
-        }
-#endif // FALCOR_INTERNAL
         else if (isCurvePolyTubeHit)
         {
             // For curves tessellated into poly-tubes, we offset the new origin away from the curve center.
@@ -993,17 +970,10 @@ struct PathTracer
                 // Setup path vertex.
                 PathVertex vertex = PathVertex(path.getVertexIndex(), sd.posW, sd.faceN, sd.frontFacing);
 
-#ifdef FALCOR_INTERNAL
-                // Determine if upper/lower hemispheres need to be sampled.
-                bool sampleUpperHemisphere = isCurveHit || isCurvePolyTubeHit || isCurveOTSHit || ((lobeTypes & (uint)LobeType::NonDeltaReflection) != 0);
-                if (!kUseLightsInDielectricVolumes && path.isInsideDielectricVolume()) sampleUpperHemisphere = false;
-                bool sampleLowerHemisphere = isCurveHit || isCurvePolyTubeHit || isCurveOTSHit || ((lobeTypes & (uint)LobeType::NonDeltaTransmission) != 0);
-#else // FALCOR_INTERNAL
                 // Determine if upper/lower hemispheres need to be sampled.
                 bool sampleUpperHemisphere = isCurveHit || isCurvePolyTubeHit || ((lobeTypes & (uint)LobeType::NonDeltaReflection) != 0);
                 if (!kUseLightsInDielectricVolumes && path.isInsideDielectricVolume()) sampleUpperHemisphere = false;
                 bool sampleLowerHemisphere = isCurveHit || isCurvePolyTubeHit || ((lobeTypes & (uint)LobeType::NonDeltaTransmission) != 0);
-#endif // FALCOR_INTERNAL
 
                 // Sample a light.
                 validSample = generateLightSample(vertex, sampleUpperHemisphere, sampleLowerHemisphere, path.sg, ls);
@@ -1025,21 +995,7 @@ struct PathTracer
                 {
                     Ray ray = ls.getVisibilityRay();
 
-#ifdef FALCOR_INTERNAL
-                    if (isCurveOTSHit)
-                    {
-                        // For curves tessellated into orthogonal triangle strips, we make sure that the origin is on the same side as light
-                        // so there is no self-shadowing (transmission lobe of hair BSDF takes care of that).
-                        if (dot(sd.faceN, ray.dir) < 0.f)
-                        {
-                            const float otsWidthScale = 1.11f;
-                            ray.origin = sd.posW - otsWidthScale * sd.faceN * sd.curveRadius;
-                        }
-                    }
-                    else if (isCurvePolyTubeHit)
-#else  // FALCOR_INTERNAL
                     if (isCurvePolyTubeHit)
-#endif // FALCOR_INTERNAL
                     {
                         // For curves tessellated into poly-tubes, we make sure that the origin is on the same side as light
                         // so there is no self-shadowing (transmission lobe of hair BSDF takes care of that).

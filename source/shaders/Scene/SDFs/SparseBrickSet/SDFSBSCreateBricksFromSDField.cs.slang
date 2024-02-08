@@ -82,71 +82,7 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID, uint3 groupThreadID : SV
     float3 brickAABBMin = -0.5f + float3(virtualBrickCoords * gParamBlock.brickWidthInVoxels) * oneOverGridWidth;
     float3 brickAABBMax = min(brickAABBMin + float(gParamBlock.brickWidthInVoxels) * oneOverGridWidth, 0.5f);
 
-#ifdef FALCOR_INTERNAL
-    if (kEnableTightBrickAABBsSBS)
-    {
-        // Loop over each voxel in the brick and compute its tight AABB.
-        // The brick AABB will be the smallest AABB that includes all voxel AABBs.
-        AABB brickAABB = AABB(FLT_MAX, -FLT_MAX);
-        for (uint z = 0; z < gParamBlock.brickWidthInVoxels; ++z)
-        {
-            uint voxelZ = brickGridCoords.z + z;
-            if (voxelZ >= gParamBlock.virtualGridWidth)
-                break;
-
-            for (uint y = 0; y < gParamBlock.brickWidthInVoxels; ++y)
-            {
-                uint voxelY = brickGridCoords.y + y;
-                if (voxelY >= gParamBlock.virtualGridWidth)
-                    break;
-
-                for (uint x = 0; x < gParamBlock.brickWidthInVoxels; ++x)
-                {
-                    uint voxelX = brickGridCoords.x + x;
-                    if (voxelX >= gParamBlock.virtualGridWidth)
-                        break;
-
-                    uint3 voxelGridCoords = uint3(voxelX, voxelY, voxelZ);
-
-                    float4 values0xx = float4(gParamBlock.sdfGrid[voxelGridCoords],
-                        gParamBlock.sdfGrid[voxelGridCoords + uint3(0, 0, 1)],
-                        gParamBlock.sdfGrid[voxelGridCoords + uint3(0, 1, 0)],
-                        gParamBlock.sdfGrid[voxelGridCoords + uint3(0, 1, 1)]);
-                    float4 values1xx = float4(gParamBlock.sdfGrid[voxelGridCoords + uint3(1, 0, 0)],
-                        gParamBlock.sdfGrid[voxelGridCoords + uint3(1, 0, 1)],
-                        gParamBlock.sdfGrid[voxelGridCoords + uint3(1, 1, 0)],
-                        gParamBlock.sdfGrid[voxelGridCoords + uint3(1, 1, 1)]);
-
-                    // Make sure that this voxel actually contains surface, otherwise we don't want to consider its AABB.
-                    if (SDFVoxelCommon::containsSurface(values0xx, values1xx))
-                    {
-                        float3 p = float3(voxelGridCoords) - float(gParamBlock.virtualGridWidth) * 0.5f;
-                        AABB voxelAABB = AABB(p * oneOverGridWidth, (p + 1.0f) * oneOverGridWidth);
-
-                        if (kEnableTightVoxelAABBsSBS)
-                            voxelAABB = SDFVoxelCommon::computeTightAABBFromSDFValues(values0xx, values1xx, voxelAABB);
-
-                        if (brickAABB.valid())
-                        {
-                            brickAABB.include(voxelAABB);
-                        }
-                        else
-                        {
-                            brickAABB = voxelAABB;
-                        }
-                    }
-                }
-            }
-        }
-        gParamBlock.brickAABBs[brickID] = brickAABB;
-    }
-    else
-    {
-        gParamBlock.brickAABBs[brickID] = AABB(brickAABBMin, brickAABBMax);
-    }
-#else   // End of FALCOR_INTERNAL.
     gParamBlock.brickAABBs[brickID] = AABB(brickAABBMin, brickAABBMax);
-#endif
 
     // Calculate the min corner of the brick in the brick texture.
     uint2 brickTextureCoords = uint2(brickID % gParamBlock.bricksPerAxis.x, brickID / gParamBlock.bricksPerAxis.x) * uint2(brickWidthInValues * brickWidthInValues, brickWidthInValues);

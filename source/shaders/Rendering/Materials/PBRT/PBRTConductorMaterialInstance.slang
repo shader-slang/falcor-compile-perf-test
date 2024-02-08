@@ -178,13 +178,4 @@ struct PBRTConductorMaterialInstance : MaterialInstanceBase, IMaterialInstance
     {
         return (uint)(bsdf.D.isSingular() ? LobeType::DeltaReflection : LobeType::SpecularReflection);
     }
-
-#ifdef FALCOR_INTERNAL
-    ExtraBSDFProperties getExtraBSDFProperties(const ShadingData sd, const float3 wo)
-    {
-        ExtraBSDFProperties result;
-        result.bsdfCount = 0;
-        return result;
-    }
-#endif
 };

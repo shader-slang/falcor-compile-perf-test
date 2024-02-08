@@ -210,13 +210,4 @@ struct PBRTDielectricMaterialInstance : MaterialInstanceBase, IMaterialInstance
         return bsdf.D.isSingular() ? ((uint)LobeType::DeltaReflection | (uint)LobeType::DeltaTransmission)
                                    : ((uint)LobeType::SpecularReflection | (uint)LobeType::SpecularTransmission);
     }
-
-#ifdef FALCOR_INTERNAL
-    ExtraBSDFProperties getExtraBSDFProperties(const ShadingData sd, const float3 wo)
-    {
-        ExtraBSDFProperties result;
-        result.bsdfCount = 0;
-        return result;
-    }
-#endif
 };

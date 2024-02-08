@@ -30,10 +30,6 @@ import Scene.Material.TextureSampler;
 import Scene.Material.AlphaTest;
 import Rendering.Volumes.PhaseFunction;
 import Utils.SlangUtils;
-#ifdef FALCOR_INTERNAL
-import Internal.Utils.Neural.Network; // Definitions for network parameter structs.
-import Internal.Utils.Neural.TIN.TinCommon;
-#endif
 __exported import Scene.SceneTypes;
 __exported import Scene.Displacement.DisplacementData;
 __exported import Scene.Material.BasicMaterialData;
@@ -60,20 +56,6 @@ struct MaterialSystem
     ByteAddressBuffer materialBuffers[ArrayMax<1, MATERIAL_SYSTEM_BUFFER_DESC_COUNT>.value];
 
     Texture3D<float4> materialTextures3D[ArrayMax<1, MATERIAL_SYSTEM_TEXTURE_3D_DESC_COUNT>.value];
-
-#ifdef FALCOR_INTERNAL
-    /// Shared parameters for neural networks.
-    /// These resources alias the same buffer to provide access as different struct formats.
-    /// TODO: Move to a general mechanism for registering shared types with the material system.
-    /// See https://gitlab-master.nvidia.com/nvresearch-gfx/Tools/Falcor/-/issues/1549
-    StructuredBuffer<NetworkParamStorageFP16> networkParamsFP16;                ///< Network parameter with accessors for FP16 format.
-    StructuredBuffer<NetworkParamStorageFP32> networkParamsFP32;                ///< Network parameter with accessors for FP32 format.
-    // Parameters for Tensor Core accelerated networks.
-    // These alias the same buffer as the above FP16/32 network parameters but uses different struct types.
-    StructuredBuffer<Tin::MMAMatStore> networkWeightsTin;                ///< Network weights for TIN.
-    StructuredBuffer<uint> networkBiasTin;                               ///< Network biases for TIN.
-    StructuredBuffer<float16_t> networkParamsNVCoopVec;                  ///< Network buffer for NVCoopVec extension.
-#endif
 
     /**
      * When UDIMs are used, this array contains indirection from <UDIM>-1001 to materialTextures.

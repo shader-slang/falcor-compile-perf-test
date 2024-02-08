@@ -106,25 +106,6 @@ struct BSDFProperties
     }
 };
 
-#ifdef FALCOR_INTERNAL
-/** Used to bring extra properties from MaterialInstance without changing the main behavior.
-    The content of this struct is to be modified based on the needs for training neural materials.
-    Note that only some materials implement getExtraBSDFProperties(), while the rest return bsdfCount=0.
-*/
-struct ExtraBSDFProperties
-{
-    uint bsdfCount; ///< Number of actually active BSDFs (0 == invalid)
-    float3 bsdfN[16]; ///< Normal used by each BSDF
-    float3 bsdfT[16]; ///< Tangent used by each BSDF
-    float3 bsdfB[16]; ///< Bitangent used by each BSDF
-    float3 bsdfAlbedo[16]; ///< Albedo of individual BSDFs
-    float3 bsdfWeight[16]; ///< Weight for the given BSDF, sums up to 1,1,1 over all the BSDFs
-    float2 bsdfRoughness[16]; ///< Anisotropic roughness
-    float3 bsdfScratch[16]; ///< Scratch direction and depth
-    float bsdfIndex[16]; ///< A BSDF index, e.g. to differentiate between different MERL materials.
-}
-#endif
-
 #ifndef FALCOR_MATERIAL_INSTANCE_SIZE
 #error Missing FALCOR_MATERIAL_INSTANCE_SIZE
 #endif
@@ -209,15 +190,6 @@ interface IMaterialInstance
         \return A combination of LobeType flags (see LobeType.slang).
     */
     uint getLobeTypes(const ShadingData sd);
-
-#ifdef FALCOR_INTERNAL
-    /** Return extra BSDF properties.
-        \param[in] sd Shading data.
-        \param[in] wo Outgoing direction.
-        \return A struct with extra properties.
-    */
-    ExtraBSDFProperties getExtraBSDFProperties(const ShadingData sd, const float3 wo);
-#endif
 
     /** Indicates if the volume properties are taken from the material instance or not
         \return True if the volume properties are textured.

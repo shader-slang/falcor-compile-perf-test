@@ -36,7 +36,6 @@ void LoadShaderModules(ProgramDesc& desc)
     ProgramDesc::ShaderModuleList shaderModules;
 
     shaderModules.push_back(ProgramDesc::ShaderModule::fromFile("Rendering/Materials/StandardMaterial.slang"));
-    shaderModules.push_back(ProgramDesc::ShaderModule::fromFile("MaterialXTemp/MxLayered_mixedLobes_Material.slang"));
     shaderModules.push_back(ProgramDesc::ShaderModule::fromFile("Rendering/Materials/ClothMaterial.slang"));
     shaderModules.push_back(ProgramDesc::ShaderModule::fromFile("Rendering/Materials/HairMaterial.slang"));
     shaderModules.push_back(ProgramDesc::ShaderModule::fromFile("Rendering/Materials/MERLMaterial.slang"));
@@ -49,7 +48,7 @@ void LoadShaderModules(ProgramDesc& desc)
     shaderModules.push_back(ProgramDesc::ShaderModule::fromFile("Rendering/Materials/PBRT/PBRTDiffuseTransmissionMaterial.slang"));
 
     desc.addShaderModules(shaderModules);
-    desc.addShaderLibrary("RenderPasses/InternalPathTracer/TracePass.cs.slang").csEntry("main");
+    desc.addShaderLibrary("RenderPasses/PathTracer/TracePassSimpleInline.cs.slang").csEntry("main");
 }
 
 void TestCase(ref<Device>& device)

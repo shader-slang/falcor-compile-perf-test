@@ -569,74 +569,6 @@ struct Scene
         return v;
     }
 
-#ifdef FALCOR_INTERNAL
-    /** Returns the interpolated vertex attributes for a given hitpoint.
-        \param[in] hit Curve OTS hit info.
-        \param[in] rayOrigin The origin of the ray that led to the hit.
-        \return Interpolated vertex attributes.
-    */
-    VertexData getVertexData(const CurveOTSHit hit, const float3 rayOrigin)
-    {
-        StaticVertexData vertices[3];
-        return getVertexData(hit, rayOrigin, vertices);
-    }
-
-    /** Returns the interpolated vertex attributes for a given hitpoint.
-        \param[in] hit Curve OTS hit info.
-        \param[in] rayOrigin The origin of the ray that led to the hit.
-        \param[out] Unpacked fetched vertices which can be used for further computations involving individual vertices.
-        \return Interpolated vertex attributes.
-    */
-    VertexData getVertexData(const CurveOTSHit hit, const float3 rayOrigin, out StaticVertexData vertices[3])
-    {
-        const uint3 vtxIndices = getIndices(hit.instanceID, hit.primitiveIndex);
-        vertices = { gScene.getVertex(vtxIndices[0]), gScene.getVertex(vtxIndices[1]), gScene.getVertex(vtxIndices[2]) };
-        const float3 barycentrics = hit.getBarycentricWeights();
-        const float4x4 worldMat = gScene.getWorldMatrix(hit.instanceID);
-        const float3x3 worldInvTransposeMat = getInverseTransposeWorldMatrix(hit.instanceID);
-        const bool isFrontFaceCW = isObjectFrontFaceCW(hit.instanceID);
-        VertexData v = computeVertexData(vertices, worldMat, worldInvTransposeMat, isFrontFaceCW, barycentrics);
-
-        // The first vertex of each triangle is at the beginning of curve segment.
-        float3 curveVertexPosW = vertices[0].position - vertices[0].curveRadius * vertices[0].normal;
-        curveVertexPosW = mul(worldMat, float4(curveVertexPosW, 1.f)).xyz;
-        // Make viewDir consistent along the entire curve segment.
-        float3 viewDir = normalize(rayOrigin - curveVertexPosW);
-
-        bool frontFacing = dot(viewDir, v.faceNormalW) >= 0.f;
-        // Set this so IoR doesn't get inverted.
-        v.faceNormalW = frontFacing ? v.faceNormalW : -v.faceNormalW;
-
-        float3 fwd = mul((float3x3)worldMat, vertices[0].tangent.xyz);
-        fwd = normalize(fwd);
-        // Negative since Falcor uses right-handed system while DX is using left-handed.
-        // No need for normalization since vectors are orthonormal.
-        float3 s = -cross(fwd, v.faceNormalW);
-
-        // u is [0, 1] across the curve segment.
-        float dist = dot(s, v.posW - curveVertexPosW);
-        dist += v.curveRadius;
-        float u = dist / (2.0f * v.curveRadius);
-        u = 1.f - u;
-
-        s = normalize(-cross(fwd, viewDir));
-        float3 t = normalize(-cross(s, fwd));
-
-        // Remap u to the range proportional to the visible width of the strip
-        // TODO: Extract 1.11 constant into some header.
-        float range = saturate(abs(dot(v.faceNormalW, t)) * 1.414f / 1.11f);
-        u = saturate((u - 0.5f) * range + 0.5f);
-
-        float cosPhi = 1.0f - 2.0f * u;
-        float sinPhi = sqrt(max(0.0f, 1 - cosPhi * cosPhi));
-        v.normalW = normalize(cosPhi * s + sinPhi * t);
-
-        v.tangentW = float4(fwd, 1.f);
-
-        return v;
-    }
-#endif // FALCOR_INTERNAL
-
     /** Returns interpolated vertex attributes in a ray tracing hit program when ray cones are used for texture LOD.
        \param[in] instanceID Geometry instance ID of the mesh.
        \param[in] triangleIndex Index of the triangle in the given mesh.
@@ -665,10 +597,6 @@ struct Scene
             return gScene.getPrevPosW(hit.getDisplacedTriangleHit());
         case HitType::Curve:
             return gScene.getPrevPosWFromCurve(hit.getCurveHit());
-#ifdef FALCOR_INTERNAL
-        case HitType::CurveOTS:
-            return gScene.getPrevPosW(hit.getCurveOTSHit());
-#endif // FALCOR_INTERNAL
         default:
             return 0.f;
         }
@@ -749,17 +677,6 @@ struct Scene
         const float4x4 prevWorldMat = loadPrevWorldMatrix(instance.globalMatrixID);
         return mul(prevWorldMat, float4(prevPos, 1.f)).xyz;
     }
-
-#ifdef FALCOR_INTERNAL
-    /** Returns interpolated position on a triangle from curve tessellated into orthogonal triangle strip in world space for the previous frame.
-        \param[in] hit CurveOTS hit info.
-        \return Interpolated position in world space for the previous frame.
-    */
-    float3 getPrevPosW(const CurveOTSHit hit)
-    {
-        return getPrevPosW(hit.instanceID, hit.primitiveIndex, hit.getBarycentricWeights());
-    }
-#endif // FALCOR_INTERNAL
 
     /** Returns a triangle's vertex positions in world space.
         \param[in] instanceID Geometry instance ID of the mesh.
@@ -913,37 +830,6 @@ struct Scene
         sdfGrid = sdfGrids[geometryInstances[instanceID.index].geometryID];
     }
 
-#ifdef FALCOR_INTERNAL
-    /** Returns the interpolated vertex attributes for an SDF grid.
-    \param[in] hit SDF grid hit info.
-    \return Interpolated vertex attributes.
-    */
-    VertexData getVertexDataFromSDFGrid(const SDFGridHit hit)
-    {
-        VertexData v;
-
-        const GeometryInstanceData instance = geometryInstances[hit.instanceID.index];
-        const SDFGrid sdfGrid = sdfGrids[instance.geometryID];
-
-        // Load Matrices.
-        const float4x4 worldMat = loadWorldMatrix(instance.globalMatrixID);
-        const float3x3 worldInvTransposeMat = loadInverseTransposeWorldMatrix(instance.globalMatrixID);
-
-        float3 hitPosition;
-        float3 gradient;
-        sdfGrid.decodeHit(hit.hitData, hitPosition, gradient);
-
-        v.posW = mul(worldMat, float4(hitPosition, 1.0f)).xyz;
-        v.normalW = normalize(mul(worldInvTransposeMat, normalize(gradient)));
-        v.tangentW = float4(perp_stark(v.normalW), 1.0f);
-        v.faceNormalW = v.normalW;
-
-        v.texC = float2(0.0f);
-        v.coneTexLODValue = 0.0f;
-
-        return v;
-    }
-#else
     /** Returns the interpolated vertex attributes for an SDF grid.
     \param[in] hit SDF grid hit info.
     \param[in] posW The world position of the hit point.
@@ -987,7 +873,6 @@ struct Scene
     {
         return getVertexDataFromSDFGrid(hit, rayOrigin + rayDir * hit.hitData.hitT);
     }
-#endif
 
     /** Returns world position of a point on an SDF grid for the previous frame.
         \param[in] hit SDF grid hit info.
@@ -1092,7 +977,4 @@ struct Scene
 
 ParameterBlock<Scene> gScene;
 #else
-#ifdef FALCOR_INTERNAL
-__exported import Internal.Scene2.Scene2;
-#endif
 #endif

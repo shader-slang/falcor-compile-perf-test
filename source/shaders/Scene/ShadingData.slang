@@ -56,9 +56,6 @@ struct ShadingData : IDifferentiable
     no_diff float4  tangentW;           ///< Geometric tangent (xyz) and sign (w) in world space. This is used for orthogonalization. Not normalized, but it is guaranteed to be nonzero and sign (w) is +-1.0.
     bool            frontFacing;        ///< True if primitive seen from the front-facing side, i.e., dot(V, faceN) >= 0.0.
     no_diff float   curveRadius;        ///< Curve cross-sectional radius. Valid only for geometry generated from curves.
-#ifdef FALCOR_INTERNAL
-    no_diff float   normalCurvature;    ///< Normal curvature if used, zero otherwise.
-#endif
 
     // Material data
     MaterialHeader mtl;                 ///< Material header data.
@@ -68,17 +65,6 @@ struct ShadingData : IDifferentiable
     uint materialGradOffset;            ///< Offset to the material gradient in the gradient buffer.
     uint geometryGradOffset;            ///< Offset to the geometry gradient in the gradient buffer.
     uint threadID;                      ///< Thread ID for gradient aggregation with a hash grid.
-
-#ifdef FALCOR_INTERNAL
-    // TODO: Re-enable once we know the performance implications.
-    // Disabled for possible performance implications, not immeditally necessary for the MaterialX integration
-
-    // Allows programmable shaders to access arbitrary geometry data
-    // HitInfo hitInfo;
-    void setHitInfo(const HitInfo hitInfo) { }
-    bool isHitInfoValid() { return false; }
-    HitInfo getHitInfo() { return {}; }
-#endif
 
     // Utility functions
 

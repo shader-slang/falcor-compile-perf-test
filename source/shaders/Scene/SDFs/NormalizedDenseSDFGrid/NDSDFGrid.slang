@@ -176,26 +176,8 @@ struct NDSDFGrid : SDFGridBase, ISDFGrid
         {
             t = tMin;
 
-#ifdef FALCOR_INTERNAL
-            uint3 voxelCoords;
-            float3 voxelUnitCoords;
-            calculateVoxelCoords(pLocal, lod, voxelCoords, voxelUnitCoords);
-
-            hitData.locationCode = SDFVoxelCommon::encodeLocation(voxelCoords, levelFromLOD(lod));
-
-            float4 values0xx;
-            float4 values1xx;
-            loadCornerValues(voxelCoords, lod, values0xx, values1xx);
-
-            uint excludedComp;
-            hitData.packedVoxelUnitCoords = SDFVoxelCommon::encodeVoxelUnitCoords(voxelUnitCoords, values0xx, values1xx, excludedComp);
-
-            // Encode excluded comp in 2 highest bits of locationCode.
-            hitData.locationCode.y |= (excludedComp & 0x3) << 30;
-#else
             hitData.lod = lod;
             hitData.hitT = t;
-#endif
             return true;
         }
 
@@ -384,27 +366,8 @@ struct NDSDFGrid : SDFGridBase, ISDFGrid
         // Linear interpolation to approximate intersection point.
         float finalH = currH * nextH / (currH - nextH);
         t += finalH;
-#ifdef FALCOR_INTERNAL
-        pLocal = rayOrigLocal + t * rayDirLocal;
-        uint3 voxelCoords;
-        float3 voxelUnitCoords;
-        calculateVoxelCoords(pLocal, lod, voxelCoords, voxelUnitCoords);
-
-        hitData.locationCode = SDFVoxelCommon::encodeLocation(voxelCoords, levelFromLOD(lod));
-
-        float4 values0xx;
-        float4 values1xx;
-        loadCornerValues(voxelCoords, lod, values0xx, values1xx);
-
-        uint excludedComp;
-        hitData.packedVoxelUnitCoords = SDFVoxelCommon::encodeVoxelUnitCoords(voxelUnitCoords, values0xx, values1xx, excludedComp);
-
-        // Encode excluded comp in 2 highest bits of locationCode.
-        hitData.locationCode.y |= (excludedComp << 30);
-#else
         hitData.lod = lod;
         hitData.hitT = t;
-#endif
         t *= inverseDirLength;
 
         return steps < kMaxSteps;
@@ -572,65 +535,6 @@ struct NDSDFGrid : SDFGridBase, ISDFGrid
         return steps < kMaxSteps;
     }
 
-#ifdef FALCOR_INTERNAL
-    void decodeHit(const SDFGridHitData hitData, out float3 hitPosition, out float3 gradient)
-    {
-        uint3 voxelCoords;
-        uint level;
-        SDFVoxelCommon::decodeLocation(hitData.locationCode, voxelCoords, level);
-
-        uint excludedComp = hitData.locationCode.y >> 30;
-        uint2 includedComps = SDFVoxelCommon::calculateIncludedVoxelUnitCoordComps(excludedComp);
-
-        const uint lod = levelToLOD(level);
-
-        float4 values0xx;
-        float4 values1xx;
-        loadCornerValues(voxelCoords, lod, values0xx, values1xx);
-
-        float3 voxelUnitCoords = SDFVoxelCommon::reconstructVoxelUnitCoords(excludedComp, includedComps, hitData.packedVoxelUnitCoords, values0xx, values1xx);
-        hitPosition = -0.5f + (float3(voxelCoords) + voxelUnitCoords) / float(1 << level);
-        gradient = calculateGradient(voxelCoords, voxelUnitCoords, lod);
-    }
-
-    float3 calculateGradient(const uint3 voxelCoords, const float3 voxelUnitCoords, const uint lod)
-    {
-        float3 gradient;
-
-#if SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_NUMERIC_DISCONTINUOUS
-        float4 values0xx;
-        float4 values1xx;
-        loadCornerValues(voxelCoords, lod, values0xx, values1xx);
-
-        const float offset = 0.2f / float(coarsestLODGridWidth << lod);
-        gradient = SDFVoxelHitUtils::computeNumericGradient(voxelUnitCoords, offset, values0xx, values1xx);
-#elif SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_NUMERIC_CONTINUOUS
-        const float lodGridWidth = float(coarsestLODGridWidth << lod);
-        const float offset = 0.2f / lodGridWidth;
-        const float3 hitPosition = (float3(voxelCoords) + voxelUnitCoords) / lodGridWidth;
-        gradient = computeContinuousTetrahedronGradient(hitPosition, lod, offset);
-#elif SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_ANALYTIC_DISCONTINUOUS
-        float4 values0xx;
-        float4 values1xx;
-        loadCornerValues(voxelCoords, lod, values0xx, values1xx);
-
-        gradient = SDFVoxelHitUtils::computeAnalyticGradient(voxelUnitCoords, values0xx, values1xx);
-#elif SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_INTERPOLATED_CONTINUOUS
-        const float lodGridWidth = float(coarsestLODGridWidth << lod);
-
-        const int3 localDualMinCoords = -1 + int3(round(voxelUnitCoords));
-        const int3 dualMinVoxelCoords = int3(voxelCoords) + localDualMinCoords;
-        const float3 hitPosition = (float3(voxelCoords) + voxelUnitCoords) / lodGridWidth;
-        const float3 dualVoxelUnitCoords = hitPosition * lodGridWidth - float3(dualMinVoxelCoords);
-
-        gradient = computeInterpolatedGradient(dualMinVoxelCoords, dualVoxelUnitCoords, lod, lodGridWidth);
-#endif
-
-        const float normalizationFactor = coarsestLODNormalizationFactor / float(1 << lod);
-        return gradient * normalizationFactor;
-    }
-
-#else
     void decodeHit(const SDFGridHitData hitData, const float3 hitPosition, out float3 gradient)
     {
         gradient = calculateGradient(hitPosition, hitData.lod);
@@ -661,8 +565,6 @@ struct NDSDFGrid : SDFGridBase, ISDFGrid
         const float normalizationFactor = coarsestLODNormalizationFactor / float(1 << lod);
         return gradient * normalizationFactor;
     }
-#endif
-
 
     float3 computeContinuousTetrahedronGradient(const float3 hitPosition, const uint lod, const float offset)
     {
@@ -711,52 +613,4 @@ struct NDSDFGrid : SDFGridBase, ISDFGrid
                 e.yxy * yxyD +
                 e.xxx * xxxD;
     }
-
-#ifdef FALCOR_INTERNAL
-    float3 computeInterpolatedGradient(const int3 dualMinVoxelCoords, const float3 dualVoxelUnitCoords, const uint lod, const uint lodGridWidth)
-    {
-        float3 unitCoords;
-        float3 weights = float3(1.0f);
-        float3 finalGradient = float3(0.0f);
-        int3 unsafeVoxelCoords;
-
-        unitCoords.z = dualVoxelUnitCoords.z;
-        weights.z = 1.5f - unitCoords.z;
-        for (unsafeVoxelCoords.z = dualMinVoxelCoords.z; unsafeVoxelCoords.z <= dualMinVoxelCoords.z + 1; unsafeVoxelCoords.z++)
-        {
-            unitCoords.y = dualVoxelUnitCoords.y;
-            weights.y = 1.5f - unitCoords.y;
-            for (unsafeVoxelCoords.y = dualMinVoxelCoords.y; unsafeVoxelCoords.y <= dualMinVoxelCoords.y + 1; unsafeVoxelCoords.y++)
-            {
-                unitCoords.x = dualVoxelUnitCoords.x;
-                weights.x = 1.5f - unitCoords.x;
-                for (unsafeVoxelCoords.x = dualMinVoxelCoords.x; unsafeVoxelCoords.x <= dualMinVoxelCoords.x + 1; unsafeVoxelCoords.x++)
-                {
-                    if (all(unsafeVoxelCoords >= 0) && all(unsafeVoxelCoords < lodGridWidth))
-                    {
-                        float4 values0xx;
-                        float4 values1xx;
-                        loadCornerValues(uint3(unsafeVoxelCoords), lod, values0xx, values1xx);
-
-                        float3 gradient = SDFVoxelHitUtils::computeAnalyticGradient(unitCoords, values0xx, values1xx);
-
-                        float w = weights.x * weights.y * weights.z;
-                        finalGradient += w * gradient;
-                    }
-
-                    unitCoords.x -= 1.0;
-                    weights.x = unitCoords.x + 0.5f;
-                }
-
-                unitCoords.y -= 1.0;
-                weights.y = unitCoords.y + 0.5f;
-            }
-
-            unitCoords.z -= 1.0;
-            weights.z = unitCoords.z + 0.5f;
-        }
-
-        return finalGradient;
-    }
-#endif
 }

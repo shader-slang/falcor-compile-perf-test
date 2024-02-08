@@ -50,9 +50,6 @@ enum class MaterialType // : uint32_t
     PBRTCoatedConductor,
     PBRTCoatedDiffuse,
     RGL,
-#ifdef FALCOR_INTERNAL
-    Layered,
-#endif
     BuiltinCount // Must be last
 };
 

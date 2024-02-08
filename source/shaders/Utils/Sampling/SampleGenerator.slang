@@ -49,22 +49,3 @@ typedef TinyUniformSampleGenerator SampleGenerator;
 import Utils.Sampling.UniformSampleGenerator;
 typedef UniformSampleGenerator SampleGenerator;
 #endif
-
-#ifdef FALCOR_INTERNAL
-#if defined(SAMPLE_GENERATOR_TYPE) && SAMPLE_GENERATOR_TYPE == SAMPLE_GENERATOR_SOBOL
-import Internal.Utils.Sampling.SobolSampleGenerator;
-typedef SobolSampleGenerator SampleGenerator;
-#elif defined(SAMPLE_GENERATOR_TYPE) && SAMPLE_GENERATOR_TYPE == SAMPLE_GENERATOR_LEAPED_HALTON
-import Internal.Utils.Sampling.LeapedHaltonSampleGenerator;
-typedef LeapedHaltonSampleGenerator SampleGenerator;
-#elif defined(SAMPLE_GENERATOR_TYPE) && SAMPLE_GENERATOR_TYPE == SAMPLE_GENERATOR_PRECOMPUTED_SOBOL
-import Internal.Utils.Sampling.PrecomputedSobolSampleGenerator;
-typedef PrecomputedSobolSampleGenerator SampleGenerator;
-#elif defined(SAMPLE_GENERATOR_TYPE) && SAMPLE_GENERATOR_TYPE == SAMPLE_GENERATOR_HEITZ_BELCOUR
-import Internal.Utils.Sampling.HeitzBelcourSampleGenerator;
-typedef HeitzBelcourSampleGenerator SampleGenerator;
-#elif defined(SAMPLE_GENERATOR_TYPE) && SAMPLE_GENERATOR_TYPE == SAMPLE_GENERATOR_SPATIOTEMPORAL_BLUE_NOISE
-import Internal.Utils.Sampling.SpatiotemporalBlueNoiseSampleGenerator;
-typedef SpatiotemporalBlueNoiseSampleGenerator SampleGenerator;
-#endif
-#endif // FALCOR_INTERNAL

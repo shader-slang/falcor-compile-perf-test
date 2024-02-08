@@ -94,9 +94,6 @@ extension MaterialSystem
         sd.faceN = v.faceNormalW;
         sd.frontFacing = dot(sd.V, sd.faceN) >= 0.f;
         sd.curveRadius = v.curveRadius;
-#ifdef FALCOR_INTERNAL
-        sd.normalCurvature = v.normalCurvature;
-#endif
 
         // Material data
         sd.mtl = materialData[materialID].header;

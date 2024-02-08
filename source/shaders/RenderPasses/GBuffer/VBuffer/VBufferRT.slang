@@ -93,33 +93,16 @@ struct VBufferRT
             v = gScene.getVertexDataFromCurve(curveHit);
             prevPosW = gScene.getPrevPosWFromCurve(curveHit);
         }
-#ifdef FALCOR_INTERNAL
-        else if (hit.getType() == HitType::CurveOTS)
-        {
-            const CurveOTSHit curveOTSHit = hit.getCurveOTSHit();
-            v = gScene.getVertexData(curveOTSHit, rayOrigin);
-            prevPosW = gScene.getPrevPosW(curveOTSHit);
-        }
-#endif // FALCOR_INTERNAL
         else if (hit.getType() == HitType::SDFGrid)
         {
             const SDFGridHit sdfGridHit = hit.getSDFGridHit();
-#ifdef FALCOR_INTERNAL
-            v = gScene.getVertexDataFromSDFGrid(sdfGridHit);
-#else
             v = gScene.getVertexDataFromSDFGrid(sdfGridHit, rayOrigin, rayDir);
-#endif
-
             prevPosW = gScene.getPrevPosWFromSDFGrid(sdfGridHit, v.posW);
         }
 
-#ifdef FALCOR_INTERNAL
-        if (hit.getType() == HitType::Triangle || hit.getType() == HitType::DisplacedTriangle || hit.getType() == HitType::Curve ||
-            hit.getType() == HitType::CurveOTS || hit.getType() == HitType::SDFGrid)
-#else  // FALCOR_INTERNAL
+
         if (hit.getType() == HitType::Triangle || hit.getType() == HitType::DisplacedTriangle || hit.getType() == HitType::Curve ||
             hit.getType() == HitType::SDFGrid)
-#endif // FALCOR_INTERNAL
         {
             // Compute depth similar to raster (NDC).
             float4 curPosH = mul(gScene.camera.data.viewProjMatNoJitter, float4(v.posW, 1.f));

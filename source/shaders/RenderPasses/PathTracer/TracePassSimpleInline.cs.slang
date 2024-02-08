@@ -8,20 +8,20 @@
  # license agreement from NVIDIA CORPORATION is strictly prohibited.
  **************************************************************************/
 import Scene.RaytracingInline;
-import InternalPathTracer;
-import InternalPathTracerNRD;
+import PathTracer;
+import PathTracerNRD;
 
-ParameterBlock<InternalPathTracer> gPathTracer;
+ParameterBlock<PathTracer> gPathTracer;
 SimpleInlineScheduler gScheduler;
 
-struct ClosestHitQuery : IClosestHitQuery
-{
-    bool traceRay(inout PathState path, const Ray ray, out HitInfo hit, out float hitT)
-    {
-        SceneRayQuery<kUseAlphaTest> sceneRayQuery;
-        return sceneRayQuery.traceRay(ray, hit, hitT, RAY_FLAG_NONE, 0xff);
-    }
-};
+// struct ClosestHitQuery : IClosestHitQuery
+// {
+//     bool traceRay(inout PathState path, const Ray ray, out HitInfo hit, out float hitT)
+//     {
+//         SceneRayQuery<kUseAlphaTest> sceneRayQuery;
+//         return sceneRayQuery.traceRay(ray, hit, hitT, RAY_FLAG_NONE, 0xff);
+//     }
+// };
 
 struct VisibilityQuery : IVisibilityQuery
 {
@@ -63,8 +63,8 @@ struct SimpleInlineScheduler
 #endif
                 if (path.isTerminated()) break;
 
-                ClosestHitQuery chq;
-                gPathTracer.nextHit(path, chq);
+                // ClosestHitQuery chq;
+                // gPathTracer.nextHit(path, chq);
             }
             else
             {

@@ -186,19 +186,7 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID, uint3 groupThreadID : SV
 
             float3 p = float3(voxelCoords) - float(gVirtualGridWidth) * 0.5f;
             AABB voxelBox = AABB(p / float(gVirtualGridWidth), (p + 1.0f) / float(gVirtualGridWidth));
-#ifdef FALCOR_INTERNAL
-            if (kEnableTightAABBsSVS)
-            {
-                AABB tightBox = SDFVoxelCommon::computeTightAABBFromSDFValues(values0xx, values1xx, voxelBox);
-                gGroupVoxelAABBs[insertIndex] = tightBox;
-            }
-            else
-            {
-                gGroupVoxelAABBs[insertIndex] = voxelBox;
-            }
-#else   // End of FALCOR_INTERNAL.
             gGroupVoxelAABBs[insertIndex] = voxelBox;
-#endif
             SDFSVSVoxel voxel;
             voxel.packedValuesSlices[0] = loadAndPackSlice(voxelCoords, -1);
             voxel.packedValuesSlices[1] = loadAndPackSlice(voxelCoords, 0);

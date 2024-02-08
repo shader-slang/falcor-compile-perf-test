@@ -154,41 +154,15 @@ struct SDFSVS : SDFGridBase, ISDFGrid
 
         // Convert the ray origin to voxel unit coords.
         float3 voxelUnitSpaceRayOrigin;
-#ifdef FALCOR_INTERNAL
-        if (kEnableTightAABBsSVS)
-        {
-            float3 pint = floor(float(virtualGridWidth) * (pMin + 0.5f));
-            float3 pMinNonTightBox = (pint - float(virtualGridWidth) * 0.5f) * oneDivVirtualGridWidth;
-            float3 pMaxNonTightBox = pMinNonTightBox + oneDivVirtualGridWidth;
-            voxelUnitSpaceRayOrigin = calculateVoxelUnitCoords(pLocal, pMinNonTightBox, pMaxNonTightBox);
-        }
-        else
-        {
-            voxelUnitSpaceRayOrigin = calculateVoxelUnitCoords(pLocal, pMin, pMax);
-        }
-#else // End of FALCOR_INTERNAL.
         voxelUnitSpaceRayOrigin = calculateVoxelUnitCoords(pLocal, pMin, pMax);
-#endif
 
         float tLocal;
         if (SDFVoxelHitUtils::intersectSDFVoxel(voxelUnitSpaceRayOrigin, rayDirLocal, origInsideAABB, values0xx, values1xx, kSnormErrorTolerance + (tMaxLocal - t) / voxelExtent, kSolverMaxStepCount, tLocal))
         {
             t += tLocal * voxelExtent;
             t *= inverseDirLength;
-
-#ifdef FALCOR_INTERNAL
-            const float3 voxelUnitCoords = voxelUnitSpaceRayOrigin + rayDirLocal * tLocal;
-
-            uint excludedComp;
-            hitData.packedVoxelUnitCoords = SDFVoxelCommon::encodeVoxelUnitCoords(voxelUnitCoords, values0xx, values1xx, excludedComp);
-
-            // Encode excluded comp in 2 highest bits of primitiveID.
-            hitData.primitiveID = primitiveID | (excludedComp << 30);
-#else
             hitData.primitiveID = primitiveID;
             hitData.hitT = t;
-#endif
-
             return true;
         }
 
@@ -236,74 +210,10 @@ struct SDFSVS : SDFGridBase, ISDFGrid
 
         // Convert the ray origin to voxel unit coords.
         float3 voxelUnitSpaceRayOrigin;
-#ifdef FALCOR_INTERNAL
-        if (kEnableTightAABBsSVS)
-        {
-            float3 pint = floor(float(virtualGridWidth) * (pMin + 0.5f));
-            float3 pMinNonTightBox = (pint - float(virtualGridWidth) * 0.5f) * oneDivVirtualGridWidth;
-            float3 pMaxNonTightBox = pMinNonTightBox + oneDivVirtualGridWidth;
-            voxelUnitSpaceRayOrigin = calculateVoxelUnitCoords(pLocal, pMinNonTightBox, pMaxNonTightBox);
-        }
-        else
-        {
-            voxelUnitSpaceRayOrigin = calculateVoxelUnitCoords(pLocal, pMin, pMax);
-        }
-#else // End of FALCOR_INTERNAL.
         voxelUnitSpaceRayOrigin = calculateVoxelUnitCoords(pLocal, pMin, pMax);
-#endif
         return SDFVoxelHitUtils::intersectSDFVoxelAny(voxelUnitSpaceRayOrigin, rayDirLocal, origInsideAABB, values0xx, values1xx, kSnormErrorTolerance + (tMaxLocal - tMinLocal) / voxelExtent, kSolverMaxStepCount);
     }
 
-#ifdef FALCOR_INTERNAL
-    void decodeHit(const SDFGridHitData hitData, out float3 hitPosition, out float3 gradient)
-    {
-        uint primitiveID = hitData.primitiveID & 0x00ffffff;
-        uint excludedComp = hitData.primitiveID >> 30;
-
-        AABB aabb = aabbs[primitiveID];
-        SDFSVSVoxel voxel = voxels[primitiveID];
-
-        // Find current voxel coords.
-        uint3 voxelCoords = calculateVoxelCoords(aabb.center() + 0.5f);
-
-        uint2 includedComps = SDFVoxelCommon::calculateIncludedVoxelUnitCoordComps(excludedComp);
-
-        float4 values0xx;
-        float4 values1xx;
-        unpackCenterValues(voxel.packedValuesSlices[1], voxel.packedValuesSlices[2], values0xx, values1xx);
-
-        float3 voxelUnitCoords = SDFVoxelCommon::reconstructVoxelUnitCoords(excludedComp, includedComps, hitData.packedVoxelUnitCoords, values0xx, values1xx);
-        hitPosition = -0.5f + (float3(voxelCoords) + voxelUnitCoords) * oneDivVirtualGridWidth;
-        gradient = calculateGradient(voxel, voxelCoords, voxelUnitCoords);
-    }
-
-    float3 calculateGradient(const SDFSVSVoxel voxel, const uint3 voxelCoords, const float3 voxelUnitCoords)
-    {
-        float3 gradient;
-#if SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_NUMERIC_DISCONTINUOUS
-        float4 values0xx;
-        float4 values1xx;
-        unpackCenterValues(voxel.packedValuesSlices[1], voxel.packedValuesSlices[2], values0xx, values1xx);
-
-        const float offset = 0.2f * oneDivVirtualGridWidth;
-        gradient = SDFVoxelHitUtils::computeNumericGradient(voxelUnitCoords, offset, values0xx, values1xx);
-#elif SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_ANALYTIC_DISCONTINUOUS
-        float4 values0xx;
-        float4 values1xx;
-        unpackCenterValues(voxel.packedValuesSlices[1], voxel.packedValuesSlices[2], values0xx, values1xx);
-
-        gradient = SDFVoxelHitUtils::computeAnalyticGradient(voxelUnitCoords, values0xx, values1xx);
-#elif SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_INTERPOLATED_CONTINUOUS
-        const int3 localDualMinCoords = -1 + int3(round(voxelUnitCoords));
-        const int3 dualMinVoxelCoords = int3(voxelCoords) + localDualMinCoords;
-        const float3 dualVoxelUnitCoords = float3(voxelCoords) + voxelUnitCoords - float3(dualMinVoxelCoords);
-
-        gradient = computeInterpolatedGradient(voxel, localDualMinCoords, dualVoxelUnitCoords);
-#endif
-
-        return gradient * normalizationFactor;
-    }
-#else
     void decodeHit(const SDFGridHitData hitData, const float3 hitPosition, out float3 gradient)
     {
         gradient = calculateGradient(hitPosition, hitData.primitiveID);
@@ -334,56 +244,4 @@ struct SDFSVS : SDFGridBase, ISDFGrid
 
         return gradient * normalizationFactor;
     }
-#endif
-
-
-#ifdef FALCOR_INTERNAL
-    float3 computeInterpolatedGradient(const SDFSVSVoxel voxel, const int3 dualMinVoxelCoords, const float3 dualVoxelUnitCoords)
-    {
-        float3 unitCoords;
-        float3 weights = float3(1.0f);
-        float3 finalGradient = float3(0.0f);
-
-        unitCoords.z = dualVoxelUnitCoords.z;
-        weights.z = 1.5f - unitCoords.z;
-        for (int z = dualMinVoxelCoords.z + 1; z <= dualMinVoxelCoords.z + 2; z++)
-        {
-            unitCoords.y = dualVoxelUnitCoords.y;
-            weights.y = 1.5f - unitCoords.y;
-            for (int y = dualMinVoxelCoords.y + 1; y <= dualMinVoxelCoords.y + 2; y++)
-            {
-                unitCoords.x = dualVoxelUnitCoords.x;
-                weights.x = 1.5f - unitCoords.x;
-                for (int x = dualMinVoxelCoords.x + 1; x <= dualMinVoxelCoords.x + 2; x++)
-                {
-                    uint neighborBit = 1 << (z + 3 * (y + 3 * x));
-
-                    if ((voxel.validNeighborsMask & neighborBit) > 0)
-                    {
-                        // Unpack the eight values we need.
-                        float4 values0xx;
-                        float4 values1xx;
-                        unpackSliceValues(voxel.packedValuesSlices[x], voxel.packedValuesSlices[x + 1], int2(y, z), values0xx, values1xx);
-
-                        float3 gradient = SDFVoxelHitUtils::computeAnalyticGradient(unitCoords, values0xx, values1xx);
-
-                        float w = weights.x * weights.y * weights.z;
-                        finalGradient += w * gradient;
-                    }
-
-                    unitCoords.x -= 1.0;
-                    weights.x = unitCoords.x + 0.5f;
-                }
-
-                unitCoords.y -= 1.0;
-                weights.y = unitCoords.y + 0.5f;
-            }
-
-            unitCoords.z -= 1.0;
-            weights.z = unitCoords.z + 0.5f;
-        }
-
-        return finalGradient;
-    }
-#endif
 };

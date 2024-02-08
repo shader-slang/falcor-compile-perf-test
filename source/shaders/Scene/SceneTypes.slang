@@ -66,9 +66,6 @@ enum class GeometryType : uint32_t
     TriangleMesh            = GEOMETRY_TYPE_TRIANGLE_MESH,
     DisplacedTriangleMesh   = GEOMETRY_TYPE_DISPLACED_TRIANGLE_MESH,
     Curve                   = GEOMETRY_TYPE_CURVE,
-#ifdef FALCOR_INTERNAL
-    CurveOTS                = GEOMETRY_TYPE_CURVE_OTS,
-#endif // FALCOR_INTERNAL
     SDFGrid                 = GEOMETRY_TYPE_SDF_GRID,
     Custom                  = GEOMETRY_TYPE_CUSTOM,
 
@@ -82,9 +79,6 @@ enum class GeometryTypeFlags : uint32_t
     TriangleMesh            = (1u << GEOMETRY_TYPE_TRIANGLE_MESH),
     DisplacedTriangleMesh   = (1u << GEOMETRY_TYPE_DISPLACED_TRIANGLE_MESH),
     Curve                   = (1u << GEOMETRY_TYPE_CURVE),
-#ifdef FALCOR_INTERNAL
-    CurveOTS                = (1u << GEOMETRY_TYPE_CURVE_OTS),
-#endif // FALCOR_INTERNAL
     SDFGrid                 = (1u << GEOMETRY_TYPE_SDF_GRID),
     Custom                  = (1u << GEOMETRY_TYPE_CUSTOM),
 };
@@ -153,9 +147,6 @@ enum class MeshFlags : uint32_t
     IsFrontFaceCW = 0x4,    ///< Front-facing side has clockwise winding in object space. Note that the winding in world space may be flipped due to the instance transform.
     IsDisplaced = 0x8,      ///< Mesh has displacement map.
     IsAnimated = 0x10,      ///< Mesh is affected by vertex-animations.
-#ifdef FALCOR_INTERNAL
-    IsCurveOTS = 0x20,      ///< Mesh is a curve tessellated into orthogonal triangle strip.
-#endif // FALCOR_INTERNAL
 };
 
 /** Mesh data stored in 64B.
@@ -215,12 +206,6 @@ struct MeshDesc
     {
         return (flags & (uint)MeshFlags::IsDisplaced) != 0;
     }
-#ifdef FALCOR_INTERNAL
-    bool isCurveOTS() CONST_FUNCTION
-    {
-        return (flags & (uint)MeshFlags::IsCurveOTS) != 0;
-    }
-#endif // FALCOR_INTERNAL
 };
 
 struct StaticVertexData
@@ -333,9 +318,6 @@ struct VertexData
     float3 faceNormalW;     ///< Face normal in world space (normalized).
     float  curveRadius;     ///< Curve cross-sectional radius. Valid only for geometry generated from curves.
     float  coneTexLODValue; ///< Texture LOD data for cone tracing. This is zero, unless getVertexDataRayCones() is used.
-#ifdef FALCOR_INTERNAL
-    float  normalCurvature; ///< Normal curvature if used, zero otherwise.
-#endif
 };
 
 struct CurveDesc

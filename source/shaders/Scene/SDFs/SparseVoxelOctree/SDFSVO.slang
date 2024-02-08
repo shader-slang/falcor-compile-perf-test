@@ -52,11 +52,6 @@ struct SDFSVO : SDFGridBase, ISDFGrid
     static const float kEpsilon = 1.0f / exp2(kStackSize);
     static const float kCoarsestLevelNormalizationFactor = 0.5f * sqrt(3.0f);
 
-#ifdef FALCOR_INTERNAL
-    static const uint kSVOIndexMask = (1 << SCENE_SDF_SVO_INDEX_BITS) - 1;
-    static const uint kSVOExcludedCompOffset = SCENE_SDF_SVO_INDEX_BITS;
-#endif
-
     StructuredBuffer<SDFSVOVoxel> svo;
     uint levelCount;
 
@@ -182,23 +177,8 @@ struct SDFSVO : SDFGridBase, ISDFGrid
                         {
                             t = (nearFar.x + tMinLocal + tLocal * scale) * inverseDirLength;
 
-#ifdef FALCOR_INTERNAL
-                            uint3 hitVoxelCoords;
-                            uint hitLevel;
-                            SDFVoxelCommon::decodeLocation(voxel.locationCode, hitVoxelCoords, hitLevel);
-
-                            float4 values0xx;
-                            float4 values1xx;
-                            SDFVoxelCommon::unpackValues(voxel.packedValues, values0xx, values1xx);
-
-                            uint excludedComp;
-                            float3 hitVoxelUnitCoords = voxelUnitCoords + tLocal * d;
-                            hitData.packedVoxelUnitCoords = SDFVoxelCommon::encodeVoxelUnitCoords(hitVoxelUnitCoords, values0xx, values1xx, excludedComp);
-                            hitData.svoIndex = (excludedComp << kSVOExcludedCompOffset) | (svoIndex & kSVOIndexMask);
-#else
                             hitData.svoIndex = svoIndex;
                             hitData.hitT = t;
-#endif
                             return true;
                         }
                     }
@@ -434,39 +414,6 @@ struct SDFSVO : SDFGridBase, ISDFGrid
         return hierarchy < kStackSize;
     }
 
-#ifdef FALCOR_INTERNAL
-    void decodeHit(const SDFGridHitData hitData, out float3 hitPosition, out float3 gradient)
-    {
-        uint svoIndex = hitData.svoIndex & kSVOIndexMask;
-
-        SDFSVOVoxel voxel = svo[svoIndex];
-
-        float4 values0xx;
-        float4 values1xx;
-        SDFVoxelCommon::unpackValues(voxel.packedValues, values0xx, values1xx);
-
-        uint excludedComp = (hitData.svoIndex >> kSVOExcludedCompOffset) & 0x3;
-        uint2 includedComps = SDFVoxelCommon::calculateIncludedVoxelUnitCoordComps(excludedComp);
-
-        float3 voxelUnitCoords = SDFVoxelCommon::reconstructVoxelUnitCoords(excludedComp, includedComps, hitData.packedVoxelUnitCoords, values0xx, values1xx);
-
-        uint3 voxelCoords;
-        uint level;
-        SDFVoxelCommon::decodeLocation(voxel.locationCode, voxelCoords, level);
-
-        float gridWidth = float(calculateGridWidthFromLevel(level));
-        hitPosition = -0.5f + (float3(voxelCoords) + voxelUnitCoords) / gridWidth;
-
-#if SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_NUMERIC_DISCONTINUOUS
-        const float offset = 0.2f / gridWidth;
-        gradient = SDFVoxelHitUtils::computeNumericGradient(voxelUnitCoords, offset, values0xx, values1xx);
-#elif SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_ANALYTIC_DISCONTINUOUS
-        gradient = SDFVoxelHitUtils::computeAnalyticGradient(voxelUnitCoords, values0xx, values1xx);
-#endif
-        gradient *= (kCoarsestLevelNormalizationFactor / gridWidth);
-    }
-
-#else
     void decodeHit(const SDFGridHitData hitData, const float3 hitPosition, out float3 gradient)
     {
         // Add 0.5f to hitPosition so that it is in [0, 1] instead of [-0.5, 0.5].
@@ -491,5 +438,4 @@ struct SDFSVO : SDFGridBase, ISDFGrid
 #endif
         gradient *= (kCoarsestLevelNormalizationFactor / gridWidth);
     }
-#endif
 };

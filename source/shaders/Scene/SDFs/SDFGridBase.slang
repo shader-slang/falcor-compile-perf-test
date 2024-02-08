@@ -58,21 +58,12 @@ interface ISDFGrid
     */
     bool intersectSDFAny(const float3 rayOrigin, const float3 rayDir, const float tMin, const float tMax, const uint primitiveID);
 
-#ifdef FALCOR_INTERNAL
-    /** Decodes a hit point and calculates the local hit position and gradient.
-        \param[in] hitData Hit data returned by intersectSDF when the hit point at pLocal was found.
-        \param[out] hitPosition The reconstructed hit position in the local space of the SDF grid.
-        \param[out] gradient The gradient of the SDF grid at hitPosition, note that this is not guaranteed to be normalized.
-    */
-    void decodeHit(const SDFGridHitData hitData, out float3 hitPosition, out float3 gradient);
-#else
     /** Decodes a hit point and calculates the gradient at that position.
         \param[in] hitData Hit data returned by intersectSDF when the hit point at pLocal was found.
         \param[in] hitPosition The position where the gradient should be calculated, must be transformed to the local space of the SDF grid.
         \param[out] gradient The gradient of the SDF grid at hitPosition, note that this is not normalized.
     */
     void decodeHit(const SDFGridHitData hitData, const float3 hitPosition, out float3 gradient);
-#endif
 }
 
 [open]

@@ -145,42 +145,4 @@ struct MERLMixMaterialInstance : MaterialInstanceBase, IMaterialInstance
         ByteAddressBuffer brdfData = gScene.materials.getBuffer(bufferID);
         return MERLCommon::eval(wi, wo, brdfData, byteOffset);
     }
-
-    ExtraBSDFProperties getExtraBSDFProperties(const ShadingData sd, const float3 wo)
-    {
-        // We use the fitted diffuse/specular BSDF as approximation and return a diffuse and specular lobe based on the fitted parameters.
-        float diffuseWeight = max(0.f, luminance(fittedBrdf.diffuse));
-        float specularWeight = max(0.001f, luminance(fittedBrdf.specular));
-        float norm = 1.f / (diffuseWeight + specularWeight);
-        diffuseWeight *= norm;
-        specularWeight *= norm;
-
-        // TODO: Is linear roughness or squared roughness (GGX alpha) best?
-        float alpha = fittedBrdf.roughness * fittedBrdf.roughness;
-
-        // Express normal tangent, and bitangent in the smooth interpolated shading frame (sd.frame).
-
-        ExtraBSDFProperties result = {};
-        result.bsdfCount = 2;
-        {
-            result.bsdfT[0] = sd.frame.toLocal(sf.T);
-            result.bsdfB[0] = sd.frame.toLocal(sf.B);
-            result.bsdfN[0] = sd.frame.toLocal(sf.N);
-            result.bsdfAlbedo[0] = fittedBrdf.diffuse;
-            result.bsdfWeight[0] = float3(diffuseWeight);
-            result.bsdfRoughness[0] = float2(1.f);
-            result.bsdfIndex[0] = float(brdfIndex);
-        }
-        {
-            result.bsdfT[1] = sd.frame.toLocal(sf.T);
-            result.bsdfB[1] = sd.frame.toLocal(sf.B);
-            result.bsdfN[1] = sd.frame.toLocal(sf.N);
-            result.bsdfAlbedo[1] = fittedBrdf.specular;
-            result.bsdfWeight[1] = float3(specularWeight);
-            result.bsdfRoughness[1] = float2(alpha);
-            result.bsdfIndex[1] = float(brdfIndex);
-        }
-
-        return result;
-    }
 };

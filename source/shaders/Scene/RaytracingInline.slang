@@ -80,17 +80,6 @@ TriangleHit getCandidateTriangleHit<let Flags : int>(RayQuery<Flags> rayQuery)
     return hit;
 }
 
-#ifdef FALCOR_INTERNAL
-CurveOTSHit getCommittedCurveOTSHit<let Flags : int>(RayQuery<Flags> rayQuery)
-{
-    CurveOTSHit hit;
-    hit.instanceID = GeometryInstanceID(rayQuery.CommittedInstanceID(), rayQuery.CommittedGeometryIndex());
-    hit.primitiveIndex = rayQuery.CommittedPrimitiveIndex();
-    hit.barycentrics = rayQuery.CommittedTriangleBarycentrics();
-    return hit;
-}
-#endif // FALCOR_INTERNAL
-
 // TODO: Pass UseAlphaTest as a template argument.
 // https://gitlab-master.nvidia.com/nvresearch-gfx/Tools/Falcor/-/issues/1179
 bool traceSceneRayImpl<let Flags : int>(const bool useAlphaTest, inout RayQuery<Flags> rayQuery, const Ray ray, out HitInfo hit, out float hitT, uint rayFlags, uint instanceInclusionMask)
@@ -174,47 +163,12 @@ bool traceSceneRayImpl<let Flags : int>(const bool useAlphaTest, inout RayQuery<
     hit = {};
     hitT = 0.f;
 
-#ifdef FALCOR_INTERNAL
-#if SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_TRIANGLE_MESH) && SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_CURVE_OTS)
-    // This requires fetching geometry type.
-    if (rayQuery.CommittedStatus() == COMMITTED_TRIANGLE_HIT)
-    {
-        const GeometryType type = getCommittedGeometryType(rayQuery);
-        switch (type)
-        {
-        case GeometryType::TriangleMesh:
-            hit = HitInfo(getCommittedTriangleHit(rayQuery));
-            hitT = rayQuery.CommittedRayT();
-            return true;
-        case GeometryType::CurveOTS:
-            hit = HitInfo(getCommittedCurveOTSHit(rayQuery));
-            hitT = rayQuery.CommittedRayT();
-            return true;
-        }
-    }
-#elif SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_TRIANGLE_MESH)
     if (rayQuery.CommittedStatus() == COMMITTED_TRIANGLE_HIT)
     {
         hit = HitInfo(getCommittedTriangleHit(rayQuery));
         hitT = rayQuery.CommittedRayT();
         return true;
     }
-#elif SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_CURVE_OTS)
-    if (rayQuery.CommittedStatue() == COMMITTED_TRIANGLE_HIT)
-    {
-        hit = HitInfo(getCommittedCurveOTSHit(rayQuery));
-        hitT = rayQuery.CommittedRayT();
-        return true;
-    }
-#endif
-#else // FALCOR_INTERNAL
-    if (rayQuery.CommittedStatus() == COMMITTED_TRIANGLE_HIT)
-    {
-        hit = HitInfo(getCommittedTriangleHit(rayQuery));
-        hitT = rayQuery.CommittedRayT();
-        return true;
-    }
-#endif // FALCOR_INTERNAL
 
 #if SCENE_HAS_PROCEDURAL_GEOMETRY()
     if (rayQuery.CommittedStatus() == COMMITTED_PROCEDURAL_PRIMITIVE_HIT)

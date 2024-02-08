@@ -175,18 +175,6 @@ HitInfo makeHitInfo(const HitObject hitObject)
             hit = HitInfo(curveHit);
             break;
         }
-#ifdef FALCOR_INTERNAL
-        case GeometryType::CurveOTS:
-        {
-            CurveOTSHit curveOTSHit;
-            curveOTSHit.instanceID = instanceID;
-            curveOTSHit.primitiveIndex = primitiveIndex;
-            BuiltInTriangleIntersectionAttributes attribs = hitObject.GetAttributes<BuiltInTriangleIntersectionAttributes>();
-            curveOTSHit.barycentrics = attribs.barycentrics;
-            hit = HitInfo(curveOTSHit);
-            break;
-        }
-#endif // FALCOR_INTERNAL
         case GeometryType::SDFGrid:
         {
             SDFGridHit sdfGridHit;
@@ -620,26 +608,6 @@ void scatterCurveClosestHit(inout PathPayload payload, CurveIntersector::Attribs
     gScheduler.handleHit(payload, HitInfo(curveHit), RayTCurrent());
 #endif
 }
-
-#ifdef FALCOR_INTERNAL
-//
-// Shader entry points for CurveOTS hit groups.
-//
-
-[shader("closesthit")]
-void scatterCurveOTSClosestHit(inout PathPayload payload : SV_RayPayload, BuiltInTriangleIntersectionAttributes attribs : SV_IntersectionAttributes)
-{
-#if USE_SER
-    gScheduler.handleHit(payload);
-#else
-    CurveOTSHit curveOTSHit;
-    curveOTSHit.instanceID = getGeometryInstanceID();
-    curveOTSHit.primitiveIndex = PrimitiveIndex();
-    curveOTSHit.barycentrics = attribs.barycentrics;
-    gScheduler.handleHit(payload, HitInfo(curveOTSHit), RayTCurrent());
-#endif
-}
-#endif // FALCOR_INTERNAL
 
 //
 // Shader entry points for SDFGrid hit groups.

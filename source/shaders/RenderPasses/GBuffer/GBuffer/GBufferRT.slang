@@ -184,12 +184,6 @@ struct GBufferRT
 
     bool evalModifyNormal(const HitType hitType)
     {
-#ifdef FALCOR_INTERNAL
-        if (hitType == HitType::CurveOTS)
-        {
-            return false;
-        }
-#endif // FALCOR_INTERNAL
         return true;
     }
 
@@ -245,26 +239,12 @@ struct GBufferRT
             v = gScene.getVertexDataFromCurve(curveHit);
             prevPosW = gScene.getPrevPosWFromCurve(curveHit);
         }
-#ifdef FALCOR_INTERNAL
-        else if (hit.getType() == HitType::CurveOTS)
-        {
-            const CurveOTSHit curveOTSHit = hit.getCurveOTSHit();
-
-            materialID = gScene.getMaterialID(curveOTSHit.instanceID);
-            v = gScene.getVertexData(curveOTSHit, rayOrigin);
-            prevPosW = gScene.getPrevPosW(curveOTSHit);
-        }
-#endif // FALCOR_INTERNAL
         else if (hit.getType() == HitType::SDFGrid)
         {
             const SDFGridHit sdfGridHit = hit.getSDFGridHit();
 
             materialID = gScene.getMaterialID(sdfGridHit.instanceID);
-#ifdef FALCOR_INTERNAL
-            v = gScene.getVertexDataFromSDFGrid(sdfGridHit);
-#else
             v = gScene.getVertexDataFromSDFGrid(sdfGridHit, rayOrigin, rayDir);
-#endif
             prevPosW = gScene.getPrevPosWFromSDFGrid(sdfGridHit, v.posW);
         }
         else

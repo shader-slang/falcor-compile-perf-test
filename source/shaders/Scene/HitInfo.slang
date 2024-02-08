@@ -189,39 +189,6 @@ struct CurveHit : GeometryHit
     }
 };
 
-#ifdef FALCOR_INTERNAL
-/** Curve tessellated into orthogonal triangle strip hit information.
-
-    Encoding:
-    | header  | barycentrics.x | barycentrics.y |
-    | 64 bits | 32 bit float   | 32 bit float   |
-*/
-struct CurveOTSHit : GeometryHit
-{
-    __init(const PackedHitInfo packed)
-    {
-#if SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_CURVE_OTS)
-        HitInfo::unpackHeader(packed, instanceID, primitiveIndex);
-        barycentrics.x = asfloat(packed[2]);
-        barycentrics.y = asfloat(packed[3]);
-#else
-        this = {};
-#endif
-    }
-
-    PackedHitInfo pack()
-    {
-        PackedHitInfo packed = {};
-#if SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_CURVE_OTS)
-        HitInfo::packHeader(packed, HitType::CurveOTS, instanceID, primitiveIndex);
-        packed[2] = asuint(barycentrics.x);
-        packed[3] = asuint(barycentrics.y);
-#endif
-        return packed;
-    }
-};
-#endif // FALCOR_INTERNAL
-
 /** SDF grid hit information.
 
     Encoding:
@@ -239,31 +206,6 @@ struct SDFGridHit
         uint primitiveData;
         HitInfo::unpackHeader(packed, instanceID, primitiveData);
 
-#ifdef FALCOR_INTERNAL
-
-#if SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_NDSDF
-        hitData.packedVoxelUnitCoords = primitiveData;
-        hitData.locationCode.x = packed[2];
-        hitData.locationCode.y = packed[3];
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SVS
-        hitData.primitiveID = primitiveData;
-        hitData.packedVoxelUnitCoords = packed[2];
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SBS
-#if SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS + SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS <= 30
-        hitData.packedVoxelCoords = primitiveData;
-        hitData.packedVoxelUnitCoords = packed[2];
-#else
-        hitData.packedVirtualBrickCoords = primitiveData;
-        hitData.packedBrickLocalVoxelCoords = packed[2];
-        hitData.packedVoxelUnitCoords = packed[3];
-#endif
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SVO
-        hitData.svoIndex = primitiveData;
-        hitData.packedVoxelUnitCoords = packed[2];
-#endif
-
-#else // FALCOR_INTERNAL
-
 #if SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_NDSDF
         hitData.lod = primitiveData;
         hitData.hitT = asfloat(packed[2]);
@@ -274,8 +216,6 @@ struct SDFGridHit
         hitData.svoIndex = primitiveData;
         hitData.hitT = asfloat(packed[2]);
 #endif
-
-#endif // FALCOR_INTERNAL
 
 #else
         this = {};
@@ -288,31 +228,6 @@ struct SDFGridHit
 
 #if SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_SDF_GRID)
         uint primitiveData = {};
-#ifdef FALCOR_INTERNAL
-
-#if SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_NDSDF
-        primitiveData = hitData.packedVoxelUnitCoords;
-        packed[2] = hitData.locationCode.x;
-        packed[3] = hitData.locationCode.y;
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SVS
-        primitiveData = hitData.primitiveID;
-        packed[2] = hitData.packedVoxelUnitCoords;
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SBS
-#if SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS + SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS <= 30
-        primitiveData = hitData.packedVoxelCoords;
-        packed[2] = hitData.packedVoxelUnitCoords;
-#else
-        primitiveData = hitData.packedVirtualBrickCoords;
-        packed[2] = hitData.packedBrickLocalVoxelCoords;
-        packed[3] = hitData.packedVoxelUnitCoords;
-#endif
-#elif SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_SVO
-        primitiveData = hitData.svoIndex;
-        packed[2] = hitData.packedVoxelUnitCoords;
-#endif
-
-#else // FALCOR_INTERNAL
-
 #if SCENE_SDF_GRID_IMPLEMENTATION == SCENE_SDF_GRID_IMPLEMENTATION_NDSDF
         primitiveData = hitData.lod;
         packed[2] = asuint(hitData.hitT);
@@ -323,9 +238,6 @@ struct SDFGridHit
         primitiveData = hitData.svoIndex;
         packed[2] = asuint(hitData.hitT);
 #endif
-
-#endif // FALCOR_INTERNAL
-
         HitInfo::packHeader(packed, HitType::SDFGrid, instanceID, primitiveData);
 #endif // SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_SDF_GRID)
 
@@ -434,16 +346,6 @@ struct HitInfo
         data = curveHit.pack();
     }
 
-#ifdef FALCOR_INTERNAL
-    /** Initialize hit info from a curve tessellated into orthogonal triangle strip hit.
-        \param[in] curveOTSHit Curve OTS hit information.
-    */
-    __init(const CurveOTSHit curveOTSHit)
-    {
-        data = curveOTSHit.pack();
-    }
- #endif // FALCOR_INTERNAL
-
     /** Initialize hit info from a SDF grid hit.
         \param[in] sdfGridHit Curve hit information.
     */
@@ -497,16 +399,6 @@ struct HitInfo
     {
         return CurveHit(data);
     }
-
-#ifdef FALCOR_INTERNAL
-    /** Return the curve OTS hit.
-        Only valid if type is HitType::CurveOTS.
-    */
-    CurveOTSHit getCurveOTSHit()
-    {
-        return CurveOTSHit(data);
-    }
-#endif // FALCOR_INTERNAL
 
     /** Return the SDF grid hit.
         Only valid if type is HitType::SDFGrid.

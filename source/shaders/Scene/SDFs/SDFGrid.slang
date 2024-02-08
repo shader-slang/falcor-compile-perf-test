@@ -53,12 +53,7 @@ struct SDFGridDummy : SDFGridBase, ISDFGrid
 {
     bool intersectSDF(const float3 rayOrigLocal, const float3 rayDirLocal, const float tMin, const float tMax, const uint primitiveID, out float t, out SDFGridHitData hitData) { t = -1.0f; hitData = {}; return false; }
     bool intersectSDFAny(const float3 rayOrigLocal, const float3 rayDirLocal, const float tMin, const float tMax, const uint primitiveID) { return false; }
-
-#ifdef FALCOR_INTERNAL
-    void decodeHit(const SDFGridHitData hitData, out float3 hitPosition, out float3 gradient) { hitPosition = float3(0.0f); gradient = float3(0.0f); };
-#else
     void decodeHit(const SDFGridHitData hitData, const float3 hitPosition, out float3 gradient) { gradient = float3(0.0f); };
-#endif
 };
 typedef SDFGridDummy SDFGrid;
 #endif

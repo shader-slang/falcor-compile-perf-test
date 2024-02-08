@@ -29,9 +29,6 @@ import Scene.Scene;
 import Scene.Displacement.DisplacementMapping;
 import Scene.SDFs.SDFGrid;
 import Utils.Geometry.IntersectionHelpers;
-#ifdef FALCOR_INTERNAL
-import Internal.Utils.Geometry.IntersectionHelpersInternal;
-#endif
 import Utils.Geometry.GeometryHelpers;
 __exported import Utils.Math.Ray;
 import Utils.Math.MatrixUtils;
@@ -121,11 +118,7 @@ struct CurveIntersector
         float3 unitRayDir = ray.dir * invRayLength;
 
         float2 result;
-#ifdef FALCOR_INTERNAL
-        bool isHit = intersectLinearSweptSphereConic(ray.origin, unitRayDir, sphereA, sphereB, kUseSphereJoints, result);
-#else
         bool isHit = intersectLinearSweptSphereHan19(ray.origin, unitRayDir, sphereA, sphereB, kUseSphereJoints, result);
-#endif
 
         if (isHit)
         {

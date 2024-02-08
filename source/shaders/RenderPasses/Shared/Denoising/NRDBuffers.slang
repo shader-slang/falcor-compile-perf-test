@@ -66,10 +66,6 @@ struct NRDBuffers
     RWTexture2D<float> deltaReflectionPathLength;
     /// Output per-pixel delta reflection hit distance. Only valid if kOutputNRDAdditionalData == true.
     RWTexture2D<float> deltaReflectionHitDist;
-#ifdef FALCOR_INTERNAL
-    /// Output per-pixel delta reflection screen-space motion vector. Only valid if kOutputNRDAdditionalData == true.
-    RWTexture2D<float2> deltaReflectionMotionVectors;
-#endif
 
     /// Output per-pixel delta transmission reflectance. Only valid if kOutputNRDAdditionalData == true.
     RWTexture2D<float4> deltaTransmissionReflectance;
@@ -81,8 +77,4 @@ struct NRDBuffers
     RWTexture2D<float> deltaTransmissionPathLength;
     /// Output per-pixel delta transmission world position. Only valid if kOutputNRDAdditionalData == true.
     RWTexture2D<float4> deltaTransmissionPosW;
-#ifdef FALCOR_INTERNAL
-    /// Output per-pixel delta transmission screen-space motion vector. Only valid if kOutputNRDAdditionalData == true.
-    RWTexture2D<float2> deltaTransmissionMotionVectors;
-#endif
 };

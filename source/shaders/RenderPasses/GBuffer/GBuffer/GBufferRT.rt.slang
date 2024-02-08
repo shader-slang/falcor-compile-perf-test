@@ -141,25 +141,6 @@ void curveClosestHit(inout RayData hitData, CurveIntersector::Attribs attribs)
     gGBufferRT.writeHit(launchIndex, WorldRayOrigin(), WorldRayDirection(), HitInfo(curveHit), RayTCurrent());
 }
 
-#ifdef FALCOR_INTERNAL
-//
-// Shader entry points for CurveOTS hit groups.
-//
-
-[shader("closesthit")]
-void curveOTSClosestHit(inout RayData hitData, BuiltInTriangleIntersectionAttributes attribs)
-{
-    CurveOTSHit curveOTSHit;
-    curveOTSHit.instanceID = getGeometryInstanceID();
-    curveOTSHit.primitiveIndex = PrimitiveIndex();
-    curveOTSHit.barycentrics = attribs.barycentrics;
-
-    // Write GBuffer data.
-    uint2 launchIndex = DispatchRaysIndex().xy;
-    gGBufferRT.writeHit(launchIndex, WorldRayOrigin(), WorldRayDirection(), HitInfo(curveOTSHit), RayTCurrent());
-}
-#endif // FALCOR_INTERNAL
-
 //
 // Shader entry points for SDFGrid hit groups.
 //

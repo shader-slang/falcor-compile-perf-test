@@ -39,18 +39,6 @@ import Utils.Geometry.IntersectionHelpers;
 
 struct SDFSBS : SDFGridBase, ISDFGrid
 {
-#ifdef FALCOR_INTERNAL
-    static const uint kVirtualBrickCoordsMask = (1 << SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS) - 1;
-    static const uint kBrickLocalVoxelCoordsMask = (1 << SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS) - 1;
-
-#if SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS + SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS <= 30
-    static const uint kBrickLocalVoxelCoordsOffset = SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS;
-    static const uint kExcludedVoxelUnitCoordCompOffset = SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS + SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS;
-#else
-    static const uint kExcludedVoxelUnitCoordCompOffset = SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS;
-#endif
-#endif
-
     StructuredBuffer<AABB> aabbs;
     Texture3D<uint> indirectionBuffer;
     Texture2D<float> bricks;
@@ -248,26 +236,8 @@ struct SDFSBS : SDFGridBase, ISDFGrid
                     t += (tLocal + tVoxelLocal) * voxelWidth;
                     t *= inverseDirLength;
 
-#ifdef FALCOR_INTERNAL
-                    float3 hitVoxelUnitCoords = voxelHitP + tVoxelLocal * d;
-                    uint excludedComp;
-                    hitData.packedVoxelUnitCoords = SDFVoxelCommon::encodeVoxelUnitCoords(hitVoxelUnitCoords, values0xx, values1xx, excludedComp);
-                    uint packedVirtualBrickCoords = flatten3D(virtualBrickCoords, virtualBricksPerAxis, virtualBricksPerAxis);
-                    uint packedBrickLocalVoxelCoords = flatten3D(brickLocalVoxelCoords, brickWidth, brickWidth);
-
-#if SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS + SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS <= 30
-                    hitData.packedVoxelCoords = (excludedComp << kExcludedVoxelUnitCoordCompOffset) |
-                        ((packedBrickLocalVoxelCoords & kBrickLocalVoxelCoordsMask) << kBrickLocalVoxelCoordsOffset) |
-                        (packedVirtualBrickCoords & kVirtualBrickCoordsMask);
-#else
-                    hitData.packedVirtualBrickCoords = packedVirtualBrickCoords;
-                    hitData.packedBrickLocalVoxelCoords = (excludedComp << kExcludedVoxelUnitCoordCompOffset) |
-                        (packedBrickLocalVoxelCoords & kBrickLocalVoxelCoordsMask);
-#endif
-#else
                     hitData.primitiveID = primitiveID;
                     hitData.hitT = t;
-#endif
                     return true;
                 }
             }
@@ -385,47 +355,6 @@ struct SDFSBS : SDFGridBase, ISDFGrid
         return false;
     }
 
-#ifdef FALCOR_INTERNAL
-    void decodeHit(const SDFGridHitData hitData, out float3 hitPosition, out float3 gradient)
-    {
-#if SCENE_SDF_SBS_VIRTUAL_BRICK_COORDS_BITS + SCENE_SDF_SBS_BRICK_LOCAL_VOXEL_COORDS_BITS <= 30
-        uint packedVirtualBrickCoords = hitData.packedVoxelCoords & kVirtualBrickCoordsMask;
-        uint packedBrickLocalVoxelCoords = (hitData.packedVoxelCoords >> kBrickLocalVoxelCoordsOffset)& kBrickLocalVoxelCoordsMask;
-        uint excludedComp = hitData.packedVoxelCoords >> kExcludedVoxelUnitCoordCompOffset;
-#else
-        uint packedVirtualBrickCoords = hitData.packedVirtualBrickCoords & kVirtualBrickCoordsMask;
-        uint packedBrickLocalVoxelCoords = hitData.packedBrickLocalVoxelCoords & kBrickLocalVoxelCoordsMask;
-        uint excludedComp = hitData.packedBrickLocalVoxelCoords >> kExcludedVoxelUnitCoordCompOffset;
-#endif
-        uint3 virtualBrickCoords = unflatten3D(packedVirtualBrickCoords, virtualBricksPerAxis, virtualBricksPerAxis);
-        uint3 brickLocalVoxelCoords = unflatten3D(packedBrickLocalVoxelCoords, brickWidth, brickWidth);
-        uint2 includedComps = SDFVoxelCommon::calculateIncludedVoxelUnitCoordComps(excludedComp);
-
-        uint2 brickTexelCoords;
-        if (calculateBrickTexelCoords(virtualBrickCoords, brickTexelCoords))
-        {
-            float4 values0xx;
-            float4 values1xx;
-            loadVoxelValues(brickTexelCoords, brickLocalVoxelCoords, values0xx, values1xx);
-
-            uint3 virtualVoxelCoords = virtualBrickCoords * brickWidth + brickLocalVoxelCoords;
-            float3 voxelUnitCoords = SDFVoxelCommon::reconstructVoxelUnitCoords(excludedComp, includedComps, hitData.packedVoxelUnitCoords, values0xx, values1xx);
-            hitPosition = (float3(virtualVoxelCoords) + voxelUnitCoords) / float(virtualGridWidth);
-
-#if SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_NUMERIC_DISCONTINUOUS
-            const float offset = 0.2f / virtualGridWidth;
-            gradient = SDFVoxelHitUtils::computeNumericGradient(voxelUnitCoords, offset, values0xx, values1xx);
-#elif SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_ANALYTIC_DISCONTINUOUS
-            gradient = SDFVoxelHitUtils::computeAnalyticGradient(voxelUnitCoords, values0xx, values1xx);
-#elif SCENE_SDF_GRADIENT_EVALUATION_METHOD == SCENE_SDF_GRADIENT_INTERPOLATED_CONTINUOUS
-            gradient = computeInterpolatedGradient(hitPosition);
-#endif
-            gradient *= normalizationFactor;
-
-            hitPosition -= 0.5f;
-        }
-    }
-#else
     void decodeHit(const SDFGridHitData hitData, const float3 hitPosition, out float3 gradient)
     {
         // Add 0.5f to hitPosition so that it is in [0, 1] instead of [-0.5, 0.5].
@@ -448,112 +377,4 @@ struct SDFSBS : SDFGridBase, ISDFGrid
 #endif
         gradient *= normalizationFactor;
     }
-#endif
-
-#ifdef FALCOR_INTERNAL
-    /** Computes the gradient at voxel coordinates uvw using an interpolation of surrounding voxels. The vector field created by this function is continuous between voxels.
-    */
-    float3 computeInterpolatedGradient(const float3 p)
-    {
-        float3 pDualMin = p - 0.5f / virtualGridWidth;
-
-        // Find current brick coords.
-        uint3 dualVirtualBrickCoords;
-        uint2 dualBrickTexelCoords;
-        int3 dualBrickLocalVoxelCoords;
-        float3 dualVoxelUnitCoords;
-        calculateBrickCoordsApprox(pDualMin, dualVirtualBrickCoords, dualBrickTexelCoords, dualBrickLocalVoxelCoords, dualVoxelUnitCoords);
-
-        dualVoxelUnitCoords += 0.5f;
-
-        float3 voxelUnitCoords;
-        float3 weights = float3(1.0f);
-        float3 finalGradient = float3(0.0f);
-
-        // This check covers all directions since when close to 0 of the brick the dualBrickLocalVoxelCoords will wrap around to kBrickWidthInVoxels - 1 for the next brick.
-        if (all(dualBrickLocalVoxelCoords < brickWidth - 1))
-        {
-            // The normal can be interpolated using only this brick.
-            voxelUnitCoords.z = dualVoxelUnitCoords.z;
-            weights.z = 1.5f - voxelUnitCoords.z;
-
-            for (int z = dualBrickLocalVoxelCoords.z; z <= dualBrickLocalVoxelCoords.z + 1; z++)
-            {
-                voxelUnitCoords.y = dualVoxelUnitCoords.y;
-                weights.y = 1.5f - voxelUnitCoords.y;
-
-                for (int y = dualBrickLocalVoxelCoords.y; y <= dualBrickLocalVoxelCoords.y + 1; y++)
-                {
-                    voxelUnitCoords.x = dualVoxelUnitCoords.x;
-                    weights.x = 1.5f - voxelUnitCoords.x;
-
-                    for (int x = dualBrickLocalVoxelCoords.x; x <= dualBrickLocalVoxelCoords.x + 1; x++)
-                    {
-                        float4 values0xx;
-                        float4 values1xx;
-                        loadVoxelValues(dualBrickTexelCoords, int3(x, y, z), values0xx, values1xx);
-
-                        float3 gradient = SDFVoxelHitUtils::computeAnalyticGradient(voxelUnitCoords, values0xx, values1xx);
-                        finalGradient += weights.x * weights.y * weights.z * gradient;
-
-                        voxelUnitCoords.x -= 1.0f;
-                        weights.x = voxelUnitCoords.x + 0.5f;
-                    }
-
-                    voxelUnitCoords.y -= 1.0f;
-                    weights.y = voxelUnitCoords.y + 0.5f;
-                }
-
-                voxelUnitCoords.z -= 1.0f;
-                weights.z = voxelUnitCoords.z + 0.5f;
-            }
-        }
-        else
-        {
-            // The normal must be interpolated between neighboring bricks.
-            voxelUnitCoords.z = dualVoxelUnitCoords.z;
-            weights.z = 1.5f - voxelUnitCoords.z;
-
-            for (int z = 0; z <= 1; z++)
-            {
-                voxelUnitCoords.y = dualVoxelUnitCoords.y;
-                weights.y = 1.5f - voxelUnitCoords.y;
-
-                for (int y = 0; y <= 1; y++)
-                {
-                    voxelUnitCoords.x = dualVoxelUnitCoords.x;
-                    weights.x = 1.5f - voxelUnitCoords.x;
-
-                    for (int x = 0; x <= 1; x++)
-                    {
-                        uint3 unusedVirtualBrickCoords;
-                        uint2 neighborBrickTexelCoords;
-                        int3 neighborBrickLocalVoxelCoords;
-                        float3 unusedVoxelUnitCoords;
-                        if (calculateBrickCoordsApprox(pDualMin + float3(x, y, z) / virtualGridWidth, unusedVirtualBrickCoords, neighborBrickTexelCoords, neighborBrickLocalVoxelCoords, unusedVoxelUnitCoords))
-                        {
-                            float4 values0xx;
-                            float4 values1xx;
-                            loadVoxelValues(neighborBrickTexelCoords, neighborBrickLocalVoxelCoords, values0xx, values1xx);
-
-                            float3 gradient = SDFVoxelHitUtils::computeAnalyticGradient(voxelUnitCoords, values0xx, values1xx);
-                            finalGradient += weights.x * weights.y * weights.z * gradient;
-                        }
-
-                        voxelUnitCoords.x -= 1.0f;
-                        weights.x = voxelUnitCoords.x + 0.5f;
-                    }
-
-                    voxelUnitCoords.y -= 1.0f;
-                    weights.y = voxelUnitCoords.y + 0.5f;
-                }
-
-                voxelUnitCoords.z -= 1.0f;
-                weights.z = voxelUnitCoords.z + 0.5f;
-            }
-        }
-
-        return finalGradient;
-    }
-#endif
 };
