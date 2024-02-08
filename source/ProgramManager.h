@@ -33,7 +33,7 @@
 #include "ProgramReflection.h"
 #include "Types.h"
 
-class ProgramDesc;
+struct ProgramDesc;
 class Device;
 class Program;
 class ProgramVersion;

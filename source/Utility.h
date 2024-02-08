@@ -74,7 +74,7 @@ inline const std::filesystem::path& getExecutablePath()
     );
     return path;
 }
-#elif defined(Windows)
+#elif defined(_WIN32)
 #include <windows.h>
 inline const std::filesystem::path& getExecutablePath()
 {
@@ -176,7 +176,7 @@ inline bool findFileInShaderDirectories(const std::filesystem::path& path, std::
 
 inline void DumpArguments(slang::SessionDesc& sessionDesc, std::vector<const char*> args)
 {
-    printf("targetCount = %ld\n", sessionDesc.targetCount);
+    printf("targetCount = %lld\n", sessionDesc.targetCount);
 
     for (uint32_t i = 0; i < sessionDesc.targetCount; i++)
     {
@@ -190,11 +190,11 @@ inline void DumpArguments(slang::SessionDesc& sessionDesc, std::vector<const cha
 
     printf("flags = %d\n", sessionDesc.flags);
     printf("defaultMatrixLayoutMode = %d\n", sessionDesc.defaultMatrixLayoutMode);
-    printf("searchPathCount = %ld\n", sessionDesc.searchPathCount);
+    printf("searchPathCount = %lld\n", sessionDesc.searchPathCount);
     for (uint32_t i = 0; i < sessionDesc.searchPathCount; i++)
         printf("searchPaths = %s\n", sessionDesc.searchPaths[i]);
 
-    printf("preprocessorMacroCount = %ld\n", sessionDesc.preprocessorMacroCount);
+    printf("preprocessorMacroCount = %lld\n", sessionDesc.preprocessorMacroCount);
     for (uint32_t i = 0; i < sessionDesc.preprocessorMacroCount; i++)
         printf("macro [name = %s, value = %s]\n", sessionDesc.preprocessorMacros[i].name, sessionDesc.preprocessorMacros[i].value);
 

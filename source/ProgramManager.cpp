@@ -722,7 +722,7 @@ SlangCompileRequest* ProgramManager::createSlangCompileRequest(const Program& pr
                 if (!findFileInShaderDirectories(path, fullPath))
                 {
                     spDestroyCompileRequest(pSlangRequest);
-                    std::string msg = std::string("Can't find shader file ") + std::string(path);
+                    std::string msg = std::string("Can't find shader file ") + path.string();
                     printf("%s\n", msg.c_str());
                     assert(0);
                 }
