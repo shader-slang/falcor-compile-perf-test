@@ -30,10 +30,10 @@ jobs:
         $tagName = & git describe --tags
         $binArchive = "falcor_perf_test-$tagName-win-64.zip"
         echo "package name=$binArchive"
-        echo "FALCOR_PERF_TEST_PACKAGE=$binArchive" >> $env:GITHUB_OUTPUT
 
         cd build/windows-ninja-msvc
         7z a "$binArchive" bin/Release/*
+        echo "FALCOR_PERF_TEST_PACKAGE=build/windows-ninja-msvc/$binArchive" >> $env:GITHUB_OUTPUT
     - name: UploadBinary
       uses: softprops/action-gh-release@v1
       with:

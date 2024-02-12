@@ -30,7 +30,7 @@ jobs:
         echo "creating zip at ${FALCOR_PERF_TEST_PACKAGE}"
         cd build/linux-gcc
         zip -r ${FALCOR_PERF_TEST_PACKAGE} bin/Release/*
-        echo "FALCOR_PERF_TEST_PACKAGE=${FALCOR_PERF_TEST_PACKAGE}" >> $GITHUB_OUTPUT
+        echo "FALCOR_PERF_TEST_PACKAGE=build/linux-gcc/${FALCOR_PERF_TEST_PACKAGE}" >> $GITHUB_OUTPUT
     - name: Upload Assert
       uses: softprops/action-gh-release@v1
       with:
