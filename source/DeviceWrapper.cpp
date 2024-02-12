@@ -3,6 +3,7 @@
 
 Device::Device()
 {
+    printf("slang: create global session\n");
     slang::createGlobalSession(m_slangGlobalSession.writeRef());
     m_pProgramManager = std::make_unique<ProgramManager>(this);
 
@@ -12,15 +13,7 @@ Device::Device()
     gfxDesc.shaderCache.maxEntryCount = 1000;
     gfxDesc.shaderCache.shaderCachePath = nullptr;
 
-    std::vector<void*> extendedDescs;
-    // Add extended desc for root parameter attribute.
-    gfx::D3D12DeviceExtendedDesc extDesc = {};
-    extDesc.rootParameterShaderAttributeName = "root";
-    extendedDescs.push_back(&extDesc);
-
-    gfxDesc.extendedDescCount = extendedDescs.size();
-    gfxDesc.extendedDescs = extendedDescs.data();
-
+    printf("gfx:: get GPU adapters\n");
     gfx::AdapterList adapters = gfx::gfxGetAdapters(gfxDesc.deviceType);
     if (adapters.getCount() == 0)
     {
@@ -33,6 +26,7 @@ Device::Device()
     mpAPIDispatcher.reset(new PipelineCreationAPIDispatcher());
     gfxDesc.apiCommandDispatcher = static_cast<ISlangUnknown*>(mpAPIDispatcher.get());
 
+    printf("gfx create device\n");
     if (SLANG_FAILED(gfx::gfxCreateDevice(&gfxDesc, m_gfxDevice.writeRef())))
     {
         printf("Failed to create device on GPU 0 (%s).", adapters.getAdapters()[0].name);

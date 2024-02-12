@@ -26,7 +26,7 @@ jobs:
       id: build
       run: |
         echo "build app"
-        cmake --build build/windows-ninja-msvc --config Release
+        cmake --build build/windows-ninja-msvc --config Release --verbose
         $tagName = & git describe --tags
         $binArchive = "falcor_perf_test-$tagName-win-64.zip"
         echo "package name=$binArchive"
@@ -34,6 +34,7 @@ jobs:
         cd build/windows-ninja-msvc
         7z a "$binArchive" bin/Release/*
         echo "FALCOR_PERF_TEST_PACKAGE=build/windows-ninja-msvc/$binArchive" >> $env:GITHUB_OUTPUT
+
     - name: UploadBinary
       uses: softprops/action-gh-release@v1
       with:

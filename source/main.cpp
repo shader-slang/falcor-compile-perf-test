@@ -128,6 +128,7 @@ void TestCase(ref<Device>& device)
 
 int main(int argc, char* argv[])
 {
+    printf("Starting creating device\n");
     ref<Device> device = make_ref<Device>();
     TestCase(device);
 

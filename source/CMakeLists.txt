@@ -1,6 +1,7 @@
 add_executable(falcor_perftest)
 
 target_sources(falcor_perftest PRIVATE
+    # simplest.cpp
     main.cpp
     Object.cpp
     path-tracer.cpp
@@ -115,8 +116,13 @@ target_compile_definitions(falcor_perftest
 
 target_link_libraries(falcor_perftest
     PUBLIC
-        slang slang-gfx
+        slang
+        slang-gfx
         external_includes
+        $<$<PLATFORM_ID:Linux>:dl>
+        $<$<PLATFORM_ID:Windows>:-static>
+        $<$<PLATFORM_ID:Windows>:-static-libgcc>
+        $<$<PLATFORM_ID:Windows>:-static-libstdc++>
 )
 
 set_target_properties(falcor_perftest PROPERTIES

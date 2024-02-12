@@ -23,4 +23,4 @@ jobs:
     - name: configure
       run: cmake --preset windows-ninja-msvc
     - name: make
-      run: cmake --build build/windows-ninja-msvc
+      run: cmake --build build/windows-ninja-msvc --verbose
