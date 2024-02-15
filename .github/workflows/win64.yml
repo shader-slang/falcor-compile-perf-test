@@ -20,6 +20,43 @@ jobs:
         # ninja version to download. Default: 1.10.0
         version: 1.10.0
 
+    - uses: robinraju/release-downloader@v1.9
+      with:
+        # The source repository path.
+        # Expected format {owner}/{repo}
+        # Default: ${{ github.repository }}
+        repository: "shader-slang/falcor-compile-perf-test"
+
+        # A flag to set the download target as latest release
+        # The default value is 'false'
+        latest: true
+
+        # The github tag. e.g: v1.0.1
+        # Download assets from a specific tag/version
+        tag: ""
+
+
+        # The name of the file to download.
+        # Use this field only to specify filenames other than tarball or zipball, if any.
+        # Supports wildcard pattern (eg: '*', '*.deb', '*.zip' etc..)
+        fileName: "falcor_perf_test-*-win-64.zip"
+
+        # Download the attached zipball (*.zip)
+        zipBall: true
+
+        # Relative path under $GITHUB_WORKSPACE to place the downloaded file(s)
+        # It will create the target directory automatically if not present
+        # eg: out-file-path: "my-downloads" => It will create directory $GITHUB_WORKSPACE/my-downloads
+        out-file-path: "./binary"
+
+        # A flag to set if the downloaded assets are archives and should be extracted
+        # Checks all downloaded files if they end with zip, tar or tar.gz and extracts them, if true.
+        # Prints a warning if enabled but file is not an archive - but does not fail.
+        extract: true
+
+    - name: check download
+      run: dir .\binary\bin\release
+
     - name: configure
       run: cmake --preset windows-ninja-msvc
     - name: make
