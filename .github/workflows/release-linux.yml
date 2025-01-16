@@ -37,7 +37,7 @@ jobs:
         echo "tag:$TAG_NAME"
         export OS_NAME=linux
         export ARCH_NAME=`uname -p`
-        export FALCOR_PERF_TEST_PACKAGE=falcor_perf_test-${TAG_NAME}-${OS_NAME}-${ARCH_NAME}.zip
+        export FALCOR_PERF_TEST_PACKAGE=falcor_perf_test-${TAG_NAME}-${OS_NAME}-${ARCH_NAME}-beta.zip
         echo "creating zip at ${FALCOR_PERF_TEST_PACKAGE}"
         cd build/linux-gcc
         zip -r ${FALCOR_PERF_TEST_PACKAGE} bin/Release/*

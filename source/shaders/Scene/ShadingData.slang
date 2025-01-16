@@ -24,24 +24,24 @@ import Utils.Math.ShadingFrame;
 struct ShadingData : IDifferentiable
 {
     // Geometry data
-    float3  posW;                       ///< Shading hit position in world space.
-    float3  V;                          ///< View direction, -incident direction (-ray.dir)
-    float2  uv;                         ///< Texture mapping coordinates.
+    float3  posW = float3(0.0);                 ///< Shading hit position in world space.
+    float3  V = float3(0.0f);                   ///< View direction, -incident direction (-ray.dir)
+    float2  uv = float2(0.0f);                  ///< Texture mapping coordinates.
 
-    ShadingFrame frame;                 ///< Smooth interpolated shading frame in world space at the shading point. The normal is *not* automatically flipped for backfacing hits.
-    no_diff float3  faceN;              ///< Face normal in world space, always on the front-facing side.
-    no_diff float4  tangentW;           ///< Geometric tangent (xyz) and sign (w) in world space. This is used for orthogonalization. Not normalized, but it is guaranteed to be nonzero and sign (w) is +-1.0.
-    bool            frontFacing;        ///< True if primitive seen from the front-facing side, i.e., dot(V, faceN) >= 0.0.
-    no_diff float   curveRadius;        ///< Curve cross-sectional radius. Valid only for geometry generated from curves.
+    ShadingFrame frame = ShadingFrame(float3(0.0), float4(0.0));///< Smooth interpolated shading frame in world space at the shading point. The normal is *not* automatically flipped for backfacing hits.
+    no_diff float3  faceN = float3(0.0);        ///< Face normal in world space, always on the front-facing side.
+    no_diff float4  tangentW = float4(0.0);     ///< Geometric tangent (xyz) and sign (w) in world space. This is used for orthogonalization. Not normalized, but it is guaranteed to be nonzero and sign (w) is +-1.0.
+    bool            frontFacing = false;        ///< True if primitive seen from the front-facing side, i.e., dot(V, faceN) >= 0.0.
+    no_diff float   curveRadius = 0.0f;         ///< Curve cross-sectional radius. Valid only for geometry generated from curves.
 
     // Material data
-    MaterialHeader mtl;                 ///< Material header data.
-    uint    materialID;                 ///< Material ID at shading location.
-    float   IoR;                        ///< Index of refraction for the medium on the front-facing side (i.e. "outside" the material at the hit).
+    MaterialHeader mtl = MaterialHeader();      ///< Material header data.
+    uint    materialID = 0;                     ///< Material ID at shading location.
+    float   IoR = 0.0f;                         ///< Index of refraction for the medium on the front-facing side (i.e. "outside" the material at the hit).
 
-    uint materialGradOffset;            ///< Offset to the material gradient in the gradient buffer.
-    uint geometryGradOffset;            ///< Offset to the geometry gradient in the gradient buffer.
-    uint threadID;                      ///< Thread ID for gradient aggregation with a hash grid.
+    uint materialGradOffset = 0;                ///< Offset to the material gradient in the gradient buffer.
+    uint geometryGradOffset = 0;                ///< Offset to the geometry gradient in the gradient buffer.
+    uint threadID = 0;                          ///< Thread ID for gradient aggregation with a hash grid.
 
     // Utility functions
 

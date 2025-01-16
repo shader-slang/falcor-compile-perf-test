@@ -36,7 +36,14 @@ struct PBRTConductorMaterial : MaterialBase, IMaterial
             adjustShadingNormal(sd, sf);
         }
 
-        PBRTConductorMaterialInstance mi = {sf, {AnisotropicGGX(roughness), baseColor, transColor}};
+        DiffMaterialData diffData;
+
+        uint offset = 0;
+        diffData.write(baseColor, offset);
+        diffData.write(transColor, offset);
+        diffData.write(roughness, offset);
+
+        PBRTConductorMaterialInstance mi = {sf, PBRTConductorBSDF(diffData)};
 
         return mi;
     }
@@ -73,8 +80,6 @@ struct PBRTConductorMaterial : MaterialBase, IMaterial
             no_diff adjustShadingNormal(sd, sf);
         }
 
-        PBRTConductorMaterialInstance mi = { sf, { AnisotropicGGX(roughness), baseColor, transColor } };
-        diffData.sf = sf;
 
         uint offset = 0;
         // 0--3: eta (baseColor)
@@ -84,6 +89,7 @@ struct PBRTConductorMaterial : MaterialBase, IMaterial
         // 6--8: roughness
         diffData.write(roughness, offset);
 
+        PBRTConductorMaterialInstance mi = {sf, PBRTConductorBSDF(diffData)};
         return mi;
     }
 };

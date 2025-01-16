@@ -28,7 +28,7 @@ struct StandardMaterial : MaterialBase, IMaterial
     {
         SamplerState s = ms.getTextureSampler(header.getDefaultTextureSamplerID());
 
-        StandardBSDFData d = {};
+        StandardBSDFData d = {DiffMaterialData()};
 
         float16_t IoR = header.getIoR();
         d.eta = sd.frontFacing ? (sd.IoR / IoR) : (IoR / sd.IoR);
@@ -114,7 +114,7 @@ struct StandardMaterial : MaterialBase, IMaterial
     {
         SamplerState s = ms.getTextureSampler(header.getDefaultTextureSamplerID());
 
-        StandardBSDFData d = {};
+        StandardBSDFData d = {DiffMaterialData()};
 
         uint hashIndex = hashFunction(sd.threadID, gSceneGradients.getHashSize(GradientType::Material));
         GradientIOWrapper gradIO = GradientIOWrapper(GradientType::Material, sd.materialGradOffset, hashIndex);

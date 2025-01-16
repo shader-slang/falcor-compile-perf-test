@@ -26,7 +26,7 @@ struct PBRTCoatedConductorMaterialInstance : MaterialInstanceBase, IMaterialInst
         if (!isValidHemisphereReflection(sd, sf, wiLocal, woLocal, wo)) return float3(0.f);
 
         PBRTDielectricBSDF top = {interfaceD, interfaceEta};
-        PBRTConductorBSDF bottom = {conductorD, conductorEta, conductorK};
+        PBRTConductorBSDF bottom = {DiffMaterialData()};
 
         return LayeredBSDF(top, bottom).eval(wiLocal, woLocal, sg);
     }
@@ -43,7 +43,7 @@ struct PBRTCoatedConductorMaterialInstance : MaterialInstanceBase, IMaterialInst
         float3 woLocal = {};
 
         PBRTDielectricBSDF top = {interfaceD, interfaceEta};
-        PBRTConductorBSDF bottom = {conductorD, conductorEta, conductorK};
+        PBRTConductorBSDF bottom = {DiffMaterialData()};
 
         bool valid = LayeredBSDF(top, bottom).sample(wiLocal, woLocal, result.pdf, result.weight, result.lobeType, sg);
         result.wo = sf.fromLocal(woLocal);
@@ -61,7 +61,7 @@ struct PBRTCoatedConductorMaterialInstance : MaterialInstanceBase, IMaterialInst
         if (!isValidHemisphereReflection(sd, sf, wiLocal, woLocal, wo)) return 0.f;
 
         PBRTDielectricBSDF top = {interfaceD, interfaceEta};
-        PBRTConductorBSDF bottom = {conductorD, conductorEta, conductorK};
+        PBRTConductorBSDF bottom = {DiffMaterialData()};
 
         return LayeredBSDF(top, bottom).evalPdf(wiLocal, woLocal);
     }
