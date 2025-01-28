@@ -30,7 +30,7 @@ struct InteriorList
 
     static const uint kMaxNestedPriority    = ((1 << kNestedPriorityBits) - 1);
 
-    uint slots[INTERIOR_LIST_SLOT_COUNT];
+    uint slots[INTERIOR_LIST_SLOT_COUNT] = {};
 
     /** Make an active material slot given the material and priority.
         \param[in] materialID Material ID.
