@@ -28,7 +28,7 @@ jobs:
         echo "build app"
         cmake --build build/windows-ninja-msvc --config Release --verbose
         $tagName = & git describe --tags
-        $binArchive = "falcor_perf_test-$tagName-win-64-beta.zip"
+        $binArchive = "falcor_perf_test-$tagName-win-64.zip"
         echo "package name=$binArchive"
 
         cd build/windows-ninja-msvc
