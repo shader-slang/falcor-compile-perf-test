@@ -30,7 +30,7 @@ elseif(FALCOR_LINUX)
     add_library(slang SHARED IMPORTED GLOBAL)
     set_target_properties(slang PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES ${SLANG_DIR}/include
-        IMPORTED_LOCATION ${SLANG_DIR}/bin/linux-x64/${FALCOR_SLANG_CONFIG}/libslang.so
+        IMPORTED_LOCATION ${SLANG_DIR}/lib/libslang.so
     )
 endif()
 
@@ -46,7 +46,7 @@ elseif(FALCOR_LINUX)
     add_library(slang-gfx SHARED IMPORTED GLOBAL)
     set_target_properties(slang-gfx PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES ${SLANG_DIR}/include
-        IMPORTED_LOCATION ${SLANG_DIR}/bin/linux-x64/${FALCOR_SLANG_CONFIG}/libgfx.so
+        IMPORTED_LOCATION ${SLANG_DIR}/lib/libgfx.so
     )
 endif()
 
