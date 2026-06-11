@@ -1,0 +1,19 @@
+version = 1
+SPDX-PackageName = "falcor-compile-perf-test"
+SPDX-PackageSupplier = "The Khronos Group, Inc."
+SPDX-PackageDownloadLocation = "https://github.com/shader-slang/falcor-compile-perf-test"
+
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "2024-2026 The Khronos Group, Inc."
+SPDX-License-Identifier = "Apache-2.0 WITH LLVM-exception"
+
+[[annotations]]
+path = "source/shaders/nanovdb/PNanoVDB.h"
+SPDX-FileCopyrightText = "Contributors to the OpenVDB Project"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = ["CODE_OF_CONDUCT.md", "CONTRIBUTING.md"]
+SPDX-FileCopyrightText = "2024-2026 The Khronos Group, Inc."
+SPDX-License-Identifier = "CC-BY-4.0"
